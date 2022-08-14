@@ -1,0 +1,96 @@
+### BACKEND BUILDER
+
+# pull official base image
+FROM python:3.9.6-alpine as backend_builder
+
+# set work directory
+WORKDIR /usr/src/app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install psycopg2 dependencies
+RUN apk update \
+    && apk add postgresql-dev gcc python3-dev musl-dev
+
+# lint
+RUN pip install --upgrade pip
+RUN pip install flake8==3.9.2
+COPY backend .
+RUN flake8 --ignore=E501,F401 .
+
+# install dependencies
+RUN apk add build-base jpeg-dev zlib-dev openldap-dev
+
+# compile
+COPY ./requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+
+# patch django-filebrowser-nograppelli (custom files needed)
+RUN apk add git
+RUN git clone https://github.com/smacker/django-filebrowser-no-grappelli.git -b v4.0.1
+WORKDIR /usr/src/app/django-filebrowser-no-grappelli
+COPY ./custom_filebrowser_patch ./filebrowser
+RUN python ./setup.py bdist_wheel
+RUN rm /usr/src/app/wheels/django_filebrowser_no_grappelli-4.0.1-py3-none-any.whl
+RUN cp ./dist/django_filebrowser_no_grappelli-4.0.1-py3-none-any.whl /usr/src/app/wheels/
+
+# create an empty pdf as placeholder
+RUN apk add imagemagick
+RUN convert xc:none -page 842x595 /usr/src/app/empty.pdf
+
+
+### FINAL
+
+# pull official base image
+FROM python:3.9.6-alpine
+
+# create the app user
+RUN addgroup -S app && adduser -S app -G app
+
+# set environment variables
+ENV HOME=/home/app
+ENV APP_DIR=/home/app/web
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# set work directory
+WORKDIR $APP_DIR
+
+# create folders
+RUN mkdir -p $HOME/staticfiles
+RUN mkdir -p $HOME/mediafiles
+
+# install dependencies
+RUN apk update && apk add libpq libldap jpeg-dev
+COPY --from=backend_builder /usr/src/app/wheels /wheels
+RUN pip install --no-cache /wheels/*
+
+# copy entrypoint
+COPY ./entrypoint.development.sh .
+RUN sed -i 's/\r$//g'  $APP_DIR/entrypoint.development.sh
+RUN chmod +x  $APP_DIR/entrypoint.development.sh
+
+# copy project
+COPY . $APP_DIR
+
+# move the default cover in mediafiles
+RUN mv $APP_DIR/static/polito.png $HOME/mediafiles/default.png
+
+# copy empty pdfs if needed (to avoid 404)
+COPY --from=backend_builder /usr/src/app/empty.pdf /tmp/empty.pdf
+RUN mkdir -p $HOME/mediafiles/uploads
+RUN if ! test -f $HOME/mediafiles/uploads/timetable.pdf; then cp /tmp/empty.pdf $HOME/mediafiles/uploads/timetable.pdf; fi
+RUN if ! test -f $HOME/mediafiles/uploads/rules.pdf; then cp /tmp/empty.pdf $HOME/mediafiles/uploads/rules.pdf; fi
+RUN rm /tmp/empty.pdf
+
+# remove useless files
+RUN rm -r /wheels $APP_DIR/custom_filebrowser_patch 
+
+# drop privileges
+RUN chown -R app:app $HOME
+USER app
+
+# entrypoint
+ENTRYPOINT ["/home/app/web/entrypoint.development.sh"]

@@ -1,0 +1,63 @@
+# NGINX configuration file
+# enviroment variables available
+# use ${DOLLAR} to print a dollar (eg. $host --> ${DOLLAR}host)
+
+upstream ladi_backend {
+    server backend:8000;
+}
+
+server {
+
+    listen 80;
+    listen 443 default_server ssl;
+
+    ssl_certificate     ${SSL_DIRECTORY}ladispe.crt;
+    ssl_certificate_key /run/secrets/ladispe.key;
+
+    server_name     ${SERVER_NAME}
+    server_tokens   ${SERVER_TOKENS};
+    client_max_body_size ${CLIENT_MAX_BODY_SIZE};
+
+    # Frontend
+
+    location / {
+        root /home/app/www/;
+        index  index.html;
+        include /etc/nginx/mime.types;
+        try_files ${DOLLAR}uri ${DOLLAR}uri/ /index.html;
+    }
+
+    # Backend proxy settings
+
+    location /api/ {
+        proxy_pass http://ladi_backend;
+        proxy_set_header X-Forwarded-For ${DOLLAR}proxy_add_x_forwarded_for;
+        proxy_set_header Host ${DOLLAR}host;
+        proxy_redirect off;
+    }
+
+    location /admin {
+        proxy_pass http://ladi_backend;
+        proxy_set_header X-Forwarded-For ${DOLLAR}proxy_add_x_forwarded_for;
+        proxy_set_header Host ${DOLLAR}host;
+        proxy_redirect off;
+    }
+
+    location /tinymce {
+        proxy_pass http://ladi_backend;
+        proxy_set_header X-Forwarded-For ${DOLLAR}proxy_add_x_forwarded_for;
+        proxy_set_header Host ${DOLLAR}host;
+        proxy_redirect off;
+    }
+
+    # Backend static files & mediafiles + storage
+
+    location /static/ {
+        alias /home/app/staticfiles/;
+    }
+
+    location /storage/ {
+        alias /home/app/mediafiles/;
+    }
+
+}

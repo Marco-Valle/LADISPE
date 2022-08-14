@@ -1,0 +1,60 @@
+<template>
+    <!-- Desktop header -->
+    <v-container fluid>
+        
+        <v-row class="header-row">
+            <v-col cols="3" offset="1">
+                <a href="https://www.polito.it">
+                    <v-img alt="POLITO LOGO" :src="logo" height="107" width="243" />
+                </a>
+            </v-col>
+            <v-col offset="1">
+                <h1 class="header-title">LADISPE</h1>
+                <h2 class="header-title">Dipartimento di Automatica e Informatica</h2>
+            </v-col>
+            <v-col cols="1"><v-spacer /></v-col>
+        </v-row>
+
+        <v-row justify="center" class="header-bottom-row">
+        </v-row>
+
+    </v-container>
+</template>
+
+<script>
+    import logo from '@/assets/logo_poli.svg';
+
+    export default {
+        name: 'LADIHeader',
+        components: {},
+        props: {},
+        data: () => ({
+            logo: logo,
+        }),
+    }
+</script>
+
+<style scoped>
+
+    @import "@/styles/main.css";
+
+    .header-bottom-row {
+        background-color: #486293;
+        height: 10px;
+    }
+
+    .header-upper-row {
+        background-color: #eeeeee;
+    }
+
+    .header-row {
+        margin-top: 1px;
+        background-color: #003576;
+    }
+
+    .header-title {
+        color: white;
+        text-align: right;
+    }
+
+</style>
