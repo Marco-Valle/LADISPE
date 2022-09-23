@@ -16,8 +16,7 @@ services:
       - ./backend/backend/.env.local
     depends_on:
       - db
-    restart:
-      - always
+    restart: always
   db:
     image: postgres:14.4-alpine
     volumes:
@@ -25,8 +24,7 @@ services:
     env_file:
       - ./db/.env
       - ./db/.env.local
-    restart:
-      - always
+    restart: always
   nginx:
     build:
       context: ./frontend
@@ -46,8 +44,7 @@ services:
       - 443:443
     depends_on:
       - backend
-    restart:
-      - always
+    restart: always
 
 
 volumes:
