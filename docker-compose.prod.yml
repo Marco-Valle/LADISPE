@@ -37,11 +37,6 @@ services:
     env_file:
       - ./frontend/nginx/.env.production
       - ./frontend/nginx/.env.local
-    secrets:
-      - source: ssl_certificate  
-        target: ladispe.crt
-      - source: ssl_key
-        target: ladispe.key
     ports:
       - 80:80
       - 443:443
