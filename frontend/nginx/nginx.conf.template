@@ -12,7 +12,7 @@ server {
     listen 443 default_server ssl;
 
     ssl_certificate     ${SSL_DIRECTORY}ladispe.crt;
-    ssl_certificate_key /run/secrets/ladispe.key;
+    ssl_certificate_key ${SSL_DIRECTORY}ladispe.key;
 
     server_name     ${SERVER_NAME}
     server_tokens   ${SERVER_TOKENS};
