@@ -2,7 +2,7 @@ from django.contrib import admin
 import logging
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from backend.settings import MEDIA_ROOT, FILEBROWSER_DIRECTORY
-from os import path, mkdir, rename
+from os import path, makedirs, rename
 from ladicourses.models import LADICourse, LADILecture
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class CourseAuthorAdmin(admin.ModelAdmin):
         course_dir = path.join(MEDIA_ROOT, FILEBROWSER_DIRECTORY, 'Users', str(obj.professor_id), obj.title)
         if not old_title and not path.isdir(course_dir):
             try:
-                mkdir(course_dir)
+                makedirs(course_dir)
             except OSError:
                 logger.warning("Can't create the course folder ({} - prof_id: {})".format(obj.title, obj.professor_id))
             return
