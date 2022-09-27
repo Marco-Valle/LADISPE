@@ -47,7 +47,7 @@
             },
             formatCrumb(crumb) {
                 const new_crumb = {
-                    text: crumb,
+                    title: crumb,
                     disabled: false,
                     href: '',
                 };
