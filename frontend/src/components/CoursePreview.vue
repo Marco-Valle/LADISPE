@@ -2,8 +2,8 @@
     <v-card elevation="2"
             class="border border-dark default-card" >
 
-        <div class="text-overline mb-1" v-if="course.degree_course">
-            prof {{ staffs.professor.fullname }}
+        <div class="text-overline mb-1"  v-if="staffs.professor.fullname != null">
+                prof {{ staffs.professor.fullname }}
         </div>
 
         <v-img max-height="250px"
@@ -14,7 +14,7 @@
             {{ course.title }}
         </v-card-title>
 
-        <v-card-subtitle>
+        <v-card-subtitle v-if="course.degree_course != null">
             {{ course.degree_course }}
         </v-card-subtitle>
 
@@ -91,11 +91,15 @@
                 Object.keys(this.staffs).forEach(key => {
                     if (this.staffs[key] === null) { return; }
                     $.ajax({
-                        url: this.userUrl + this.staffs[key].user_id,
+                        url: this.userUrl + this.staffs[key].id,
                         type: "get",
                         dataType: "json",
                         success: (response) => {
-                            this.staffs[key].fullname = `${response.name} ${response.surname}`;
+                            if (response.name == null || response.surname == null){
+                                this.staffs[key].fullname = null;
+                            } else {
+                                this.staffs[key].fullname = `${response.name} ${response.surname}`;
+                            }
                             this.staffs[key].email = response.email;
                         },
                         error: (jqXHR, textStatus, errorThrown) => {

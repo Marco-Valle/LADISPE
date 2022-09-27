@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.core.exceptions import SuspiciousOperation
 from django.core.exceptions import ObjectDoesNotExist
 from backend.settings import MEDIA_ROOT, MEDIA_URL, FILEBROWSER_DIRECTORY, MAX_DEPTH_IN_MATERIAL_SEARCH
-from os import path, walk
+from os import path, walk, name as osname
 from urllib.parse import quote
 from time import strftime, localtime
 from filebrowser.base import FileObject
@@ -75,7 +75,12 @@ def courses_recursive_browse(dirs_list, parent, depth, breadcrumbs):
     if depth:
         for topic_title in parent_dir[1]:
             # For each subdirectory
-            breadcrumbs.append(str(path.join(parent, topic_title).split('\\')[-1]))
+            crumb = path.join(parent, topic_title)
+            if osname == 'nt':
+                crumb = crumb.split('\\')
+            else:
+                crumb = crumb.split('/')
+            breadcrumbs.append(str(crumb[-1]))
             dirs_list.append({'title': topic_title, 'breadcrumbs': breadcrumbs.copy(),
                               'files': courses_recursive_browse(dirs_list, path.join(parent, topic_title), depth - 1, breadcrumbs)})
             breadcrumbs.pop()
