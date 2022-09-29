@@ -15,9 +15,6 @@ from os.path import join
 from django.conf import settings
 import environ
 
-import ldap
-from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -102,31 +99,7 @@ MAX_DEPTH_IN_MATERIAL_SEARCH = 3
 # LDAP configuration
 
 AUTH_LDAP_SERVER_URI = env('AUTH_LDAP_SERVER_URI')
-AUTH_LDAP_BIND_DN = env('AUTH_LDAP_BIND_DN')
-AUTH_LDAP_BIND_PASSWORD = env('AUTH_LDAP_BIND_PASSWORD')
-AUTH_LDAP_USER_SEARCH = LDAPSearch(
-    env('SEARCH_STRING'),
-    ldap.SCOPE_SUBTREE,
-    '(mail=%(user)s)',
-)
-
-# Populate the Django user from the LDAP directory.
-AUTH_LDAP_USER_ATTR_MAP = {
-    'name': 'givenName',
-    'surname': 'sn',
-    'email': 'mail',
-}
-
-AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-    # 'is_staff': 'ou=Utenti-Ateneo,dc=polito,dc=it',
-}
-
-# This is the default, but I like to be explicit.
-AUTH_LDAP_ALWAYS_UPDATE_USER = False
-
-# Cache distinguished names and group memberships for an hour to minimize
-# LDAP traffic.
-AUTH_LDAP_CACHE_TIMEOUT = 3600
+AUTH_LDAP_USER_SEARCH = env('SEARCH_STRING')
 
 # Application definition
 
@@ -134,8 +107,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 if env('LDAP_AUTH'):
-    # NOT STABLE yet
-    AUTHENTICATION_BACKENDS.insert(0, 'django_auth_ldap.backend.LDAPBackend')
+    AUTHENTICATION_BACKENDS.insert(0, 'ladiusers.ldap_auth_backend.CustomLDAPBackend')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
