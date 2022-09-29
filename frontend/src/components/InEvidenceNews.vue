@@ -7,8 +7,9 @@
 
                 <RefreshIcon icon="mdi-newspaper" clickEvent="updateNewsInEvidence" />
                 <v-spacer />
-                
-                <v-carousel hide-delimiters class="my-carousel"
+
+                <v-carousel class="my-carousel"
+                            cycle hide-delimiter-background
                             :show-arrows="newsSettings.showArrows" >
                     <v-carousel-item v-for="(group, index) in newsInBatches" :key="`G${index}`" height="450">
 
