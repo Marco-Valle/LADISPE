@@ -19,10 +19,7 @@
                     <div class="flex-div">
 
                         <StaffCard  v-for="item in staffs" :key="item.id"
-                                    :staff="item"
-                                    :buttonsColor="buttonsColor"
-                                    :boxsBorderRadius="boxsBorderRadius"
-                                    :cardsColor="cardsColor" />
+                                    :staff="item" />
 
                     </div>
                 </v-row>
