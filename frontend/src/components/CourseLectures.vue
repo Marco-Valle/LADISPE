@@ -8,7 +8,8 @@
                 <RefreshIcon icon="mdi-book" clickEvent="updateLectures" />
                 <v-spacer />
 
-                <v-carousel hide-delimiters class="my-carousel"
+                <v-carousel class="my-carousel"  
+                            cycle hide-delimiter-background
                             :show-arrows="lecturesSettings.showArrows">
 
                     <v-carousel-item v-for="(group, index) in lecturesInBatches" :key="`G${index}`" height="450">
