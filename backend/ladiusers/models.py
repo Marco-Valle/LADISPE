@@ -9,7 +9,7 @@ class LADIUser(AbstractBaseUser, PermissionsMixin):
         verbose_name='email address',
         max_length=255,
         unique=True,
-        help_text="""Don't use the POLITO email, it can cause conflicts with the LDAP login.<br><br>
+        help_text="""
         REMARKS:<br>
         * in order to make <b>IS_BORSISTA</b> true for a user the group <b>Borsisti</b> should be created and he has to be added;<br>
         * in order to make <b>IS_PROFESSOR</b> true for a user the group <b>Professors</b> should be created and he has to be added.
