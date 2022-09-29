@@ -1,7 +1,7 @@
 <template>
     <v-container fluid class="border border-dark view-container" >
 
-        <v-icon size="x-large" @click="updateCourses()">mdi-bookshelf</v-icon>
+        <RefreshIcon icon="mdi-bookshelf" clickEvent="updateCourses" />
 
         <!-- Standard div with flex properties, waiting for v-flex implementation on vuetify 3 -->
         <div class="flex-div">
@@ -17,12 +17,14 @@
 <script>
 
     import CoursePreview from '@/components/CoursePreview.vue';
+    import RefreshIcon from '@/components/RefreshIcon.vue';
     import $ from "jquery";
 
     export default {
         name: 'CoursesView',
         data: function () {
             return {
+                userLang: navigator.language || navigator.userLanguage,
                 api_base_url: 'http://localhost/',
                 coursesUrl: 'http://localhost/ladicourses/',
                 courses: [],
@@ -30,6 +32,12 @@
         },
         components: {
             CoursePreview,
+            RefreshIcon,
+        },
+        created(){
+            this.emitter.on('updateCourses', () => {
+                this.updateCourses();
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;

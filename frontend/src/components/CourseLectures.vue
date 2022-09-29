@@ -5,7 +5,7 @@
             <!-- Lectures -->
             <v-col>
 
-                <v-icon size="x-large" @click="updateLectures()">mdi-book</v-icon>
+                <RefreshIcon icon="mdi-book" clickEvent="updateLectures" />
                 <v-spacer />
 
                 <v-carousel hide-delimiters class="my-carousel"
@@ -53,13 +53,16 @@
 
 <script>
 
+    import RefreshIcon from '@/components/RefreshIcon.vue';
     import $ from "jquery";
     import { computed } from "vue";
     import { useDisplay } from "vuetify";
 
     export default {
         name: 'CourseLectures',
-        components: {},
+        components: {
+            RefreshIcon,
+        },
         props: {},
         data: () => ({
             courseId: 0,
@@ -98,6 +101,9 @@
         created() {
             window.addEventListener("resize", this.adjustLecturesBatches);
             window.addEventListener("orientationchange", this.adjustLecturesBatches);
+            this.emitter.on('updateLectures', () => {
+                this.updateLectures();
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;

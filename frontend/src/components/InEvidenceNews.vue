@@ -4,8 +4,10 @@
 
             <!-- In evidence news -->
             <v-col>
-                <v-icon size="x-large" @click="updateNewsInEvidence()">mdi-newspaper</v-icon>
+
+                <RefreshIcon icon="mdi-newspaper" clickEvent="updateNewsInEvidence" />
                 <v-spacer />
+                
                 <v-carousel hide-delimiters class="my-carousel"
                             :show-arrows="newsSettings.showArrows" >
                     <v-carousel-item v-for="(group, index) in newsInBatches" :key="`G${index}`" height="450">
@@ -58,13 +60,16 @@
 
 <script>
 
+    import RefreshIcon from '@/components/RefreshIcon.vue';
     import $ from "jquery";
     import { computed } from "vue";
     import { useDisplay } from "vuetify";
 
     export default {
         name: 'InEvidenceNews',
-        components: {},
+        components: {
+            RefreshIcon,
+        },
         props: {
             'truncateAfterNChars': {
                 type: Number,
@@ -106,6 +111,9 @@
         created() {
             window.addEventListener("resize", this.adjustNewsBatches);
             window.addEventListener("orientationchange", this.adjustNewsBatches);
+            this.emitter.on('updateNewsInEvidence', () => {
+                this.updateNewsInEvidence();
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;

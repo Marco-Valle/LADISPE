@@ -4,7 +4,7 @@
         <v-row align="center" justify="start">
 
             <v-col cols="auto">
-                <v-icon size="x-large" @click="updateStories()">mdi-book-outline</v-icon>
+                <RefreshIcon icon="mdi-book-outline" clickEvent="updateStories" />
             </v-col>
             <v-col cols="auto">
                 <v-select class="storySelector"
@@ -40,6 +40,7 @@
 <script>
 
     import StoryPreview from '@/components/StoryPreview.vue';
+    import RefreshIcon from '@/components/RefreshIcon.vue';
     import $ from "jquery";
 
     export default {
@@ -59,6 +60,12 @@
         },
         components: {
             StoryPreview,
+            RefreshIcon,
+        },
+        created(){
+            this.emitter.on('updateStories', () => {
+                this.updateStories();
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;

@@ -1,7 +1,8 @@
 <template>
     <v-container fluid class="border border-dark view-container" >
 
-        <v-icon size="x-large" @click="updateForms()">mdi-file-pdf-box</v-icon>
+        <RefreshIcon icon="mdi-file-pdf-box" clickEvent="updateForms" />
+        
         <v-row align="center" justify="center">
             <v-col cols="12" sm="10" md="8" lg="6" xl="6" xxl="6">
 
@@ -32,6 +33,8 @@
 </template>
 
 <script>
+    
+    import RefreshIcon from '@/components/RefreshIcon.vue';
     import $ from "jquery";
 
     export default {
@@ -45,6 +48,12 @@
             }
         },
         components: {
+            RefreshIcon,
+        },
+        created(){
+            this.emitter.on('updateForms', () => {
+                this.updateForms();
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;
