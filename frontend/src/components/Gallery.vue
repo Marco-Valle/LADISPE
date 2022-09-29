@@ -17,8 +17,9 @@
 
                     <SwiperSlide v-for="item in pictures" :key="item.id" :virtualIndex="index">
 
-                        <a :href="item.news_id == null ? item.link : redirectOnClick"
-                           @click="item.news_id == null ? emitNewsSearch(-1) : emitNewsSearch(item.news_id)" >
+                        <a  class="site-anchor"
+                            :href="item.news_id == null ? item.link : redirectOnClick"
+                            @click="item.news_id == null ? emitNewsSearch(-1) : emitNewsSearch(item.news_id)" >
                             <v-img  :src="mediaUrl + item.picture" :alt="item.description"
                                     class="gallery-image" />
                         </a>

@@ -15,7 +15,8 @@
                         <template v-slot:prepend>
                             <v-icon icon="mdi-file-pdf-box"></v-icon>
                         </template>
-                        <a :href="mediaUrl + item.file" target="_blank">   
+                        <a  class="site-anchor"
+                            :href="mediaUrl + item.file" target="_blank">   
                             <v-list-item-title>
                                 {{ item.title }}
                             </v-list-item-title>

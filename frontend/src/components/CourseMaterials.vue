@@ -78,7 +78,8 @@
                                         <tbody v-if="material.files.length !== 0">
                                             <tr v-for="(file, index) in material.files" :key="`F${index}`">
                                                 <td>
-                                                    <a :href="file.url" target="_blank">
+                                                    <a  class="site-anchor"
+                                                        :href="file.url" target="_blank">
                                                         {{ file.name }}
                                                     </a>
                                                 </td>

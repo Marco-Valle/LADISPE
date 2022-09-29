@@ -4,7 +4,8 @@
         
         <v-row class="header-row">
             <v-col cols="3" offset="1">
-                <a href="https://www.polito.it">
+                <a  class="site-anchor"
+                    href="https://www.polito.it">
                     <v-img alt="POLITO LOGO" :src="logo" height="107" width="243" />
                 </a>
             </v-col>

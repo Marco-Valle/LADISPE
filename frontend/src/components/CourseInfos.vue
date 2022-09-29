@@ -54,7 +54,9 @@
                                     <p v-else>Secondo Assistente</p>
                                 </td>
                                 <td v-if="staff != undefined">{{ staff.fullname }}</td>
-                                <td v-if="staff != undefined"><a :href="`mailto:${ staff.email }`">{{ staff.email }}</a></td>
+                                <td v-if="staff != undefined">
+                                    <a class="site-anchor" :href="`mailto:${ staff.email }`">{{ staff.email }}</a>
+                                </td>
                             </tr>
                         </tbody>
                         <tbody v-else>
@@ -65,7 +67,9 @@
                                     <p v-else>Second Assistant</p>
                                 </td>
                                 <td v-if="staff != undefined">{{ staff.fullname }}</td>
-                                <td v-if="staff != undefined"><a :href="`mailto:${ staff.email }`">{{ staff.email }}</a></td>
+                                <td v-if="staff != undefined">
+                                    <a class="site-anchor" :href="`mailto:${ staff.email }`">{{ staff.email }}</a>
+                                </td>
                             </tr>
                         </tbody>
                     </v-table>
