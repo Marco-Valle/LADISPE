@@ -30,9 +30,14 @@ class CustomLDAPBackend(ModelBackend):
             user = User.objects.get(email=username)
             user.set_password(password)
         except User.DoesNotExist:
-            name = ldap_user['givenName'][0].decode("utf-8").title()
-            surname = ldap_user['sn'][0].decode("utf-8").title()
-            email = ldap_user['mail'][0].decode("utf-8").lower()
+            try:
+                name = ldap_user['givenName'][0].decode("utf-8").title()
+                surname = ldap_user['sn'][0].decode("utf-8").title()
+                email = ldap_user['mail'][0].decode("utf-8").lower()
+            except TypeError:
+                name = ''
+                surname = ''
+                email = username.lower()
             is_staff = email.find('@studenti.polito.it') == -1
             user = User.objects.create_user(email=email,
                                             password=password,
