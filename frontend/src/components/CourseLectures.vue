@@ -23,8 +23,7 @@
                                 <v-img height="250"
                                        alt="item.title"
                                        :src="mediaUrl + item.cover" />
-                                <v-card-title>
-                                    {{ item.title }}
+                                <v-card-title v-html="item.visibleTitle">
                                 </v-card-title>
                                 <v-card-subtitle>
                                     {{ item.timestamp.split('T')[0] }}
@@ -64,7 +63,20 @@
         components: {
             RefreshIcon,
         },
-        props: {},
+        props: {
+            'titleLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 22;
+                }
+            },
+            'titleOneLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 26;
+                }
+            },
+        },
         data: () => ({
             courseId: 0,
             lectures: [],
@@ -150,6 +162,34 @@
                 });
                 return counter;
             },
+            truncateTitle(title) {
+                let visibleTitle='';
+                if (this.checkHtml(title) != 0){
+                    return visibleTitle;
+                }
+                if (title.length == this.titleOneLineMaxLen){
+                    visibleTitle = title;
+                    return visibleTitle;
+                }
+                let index;
+                for (index = this.titleLineMaxLen; index < title.length; index+=this.titleLineMaxLen) {
+                    visibleTitle += title.substring(index-this.titleLineMaxLen, index);
+                    visibleTitle += '-<br>';
+                }
+                visibleTitle += title.substring(index-this.titleLineMaxLen, title.length);
+                return visibleTitle;
+            },
+            checkHtml(string){
+                if (
+                    string.search('<') != -1 ||
+                    string.search('>') != -1 || 
+                    string.search('&lt;') != -1 ||
+                    string.search('&gt;') != -1
+                    ) {
+                        return -1;
+                    }
+                return 0;
+            },
             async updateLectures() {
                 if (this.courseId <= 0) { return; }
                 $.ajax({
@@ -157,7 +197,12 @@
                     type: "get",
                     dataType: "json",
                     success: (response) => {
-                        this.lectures = [...response];
+                        this.lectures = [];
+                        this.newsInEvidence = [];
+                        response.forEach(lecture => {
+                            lecture.visibleTitle = this.truncateTitle(lecture.title);
+                            this.lectures.push(lecture);
+                        });
                         this.adjustLecturesBatches();
                     },
                     error: (jqXHR, textStatus, errorThrown) => {
