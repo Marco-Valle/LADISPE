@@ -22,8 +22,8 @@
                                 <v-img height="250"
                                        alt="item.title"
                                        :src="mediaUrl + item.cover" />
-                                       <v-card-title v-html="item.visibleTitle">
-                                        </v-card-title>
+                                <v-card-title v-html="item.visibleTitle">
+                                </v-card-title>
                                 <v-card-subtitle>
                                     {{ item.timestamp.split('T')[0] }}
                                 </v-card-subtitle>
