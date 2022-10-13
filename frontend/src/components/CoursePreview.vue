@@ -10,8 +10,7 @@
                alt="course.title"
                :src="mediaUrl + course.cover" />
 
-        <v-card-title>
-            {{ course.title }}
+        <v-card-title v-html="visibleTitle">
         </v-card-title>
 
         <v-card-subtitle v-if="course.degree_course != null">
@@ -57,6 +56,7 @@
                 userUrl: 'http://localhost/ladiuser/?id=',
                 mediaUrl: 'http://localhost/storage/',
                 visibleDescription: '',
+                visibleTitle: '',
                 staffs: {
                     'professor': {
                         'id': this.course.professor_id,
@@ -72,10 +72,22 @@
                 type: Object,
                 required: true
             },
-            'truncateAfterNChars': {
+            'descriptionMaxLen': {
                 type: Number,
                 default: function () {
                     return 200;
+                }
+            },
+            'titleLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 22;
+                }
+            },
+            'titleOneLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 26;
                 }
             },
         },
@@ -85,6 +97,7 @@
             this.userUrl = `${this.api_base_url}ladiuser/?id=`;
             this.updateCourseStaff();
             this.setDescription();
+            this.truncateTitle();
         },
         methods: {
             async updateCourseStaff() {
@@ -110,11 +123,37 @@
                 });
             },
             setDescription() {
-                if (this.course.description.length > this.truncateAfterNChars) {
-                    this.visibleDescription = this.course.description.slice(0, this.truncateAfterNChars) + '...';
+                if (this.course.description.length > this.descriptionMaxLen) {
+                    this.visibleDescription = this.course.description.slice(0, this.descriptionMaxLen) + '...';
                 } else {
                     this.visibleDescription = this.course.description;
                 }
+            },
+            truncateTitle() {
+                if (this.checkHtml(this.course.title) != 0){
+                    return;
+                }
+                if (this.course.title.length == this.titleOneLineMaxLen){
+                    this.visibleTitle = this.course.title;
+                    return;
+                }
+                let index;
+                for (index = this.titleLineMaxLen; index < this.course.title.length; index+=this.titleLineMaxLen) {
+                    this.visibleTitle += this.course.title.substring(index-this.titleLineMaxLen, index);
+                    this.visibleTitle += '-<br>';
+                }
+                this.visibleTitle += this.course.title.substring(index-this.titleLineMaxLen, this.course.title.length);
+            },
+            checkHtml(string){
+                if (
+                    string.search('<') != -1 ||
+                    string.search('>') != -1 || 
+                    string.search('&lt;') != -1 ||
+                    string.search('&gt;') != -1
+                    ) {
+                        return -1;
+                    }
+                return 0;
             },
             email(email) {
                 window.open('mailto:' + email, '_self');
