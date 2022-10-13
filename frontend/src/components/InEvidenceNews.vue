@@ -22,9 +22,8 @@
                                 <v-img height="250"
                                        alt="item.title"
                                        :src="mediaUrl + item.cover" />
-                                <v-card-title>
-                                    {{ item.title }}
-                                </v-card-title>
+                                       <v-card-title v-html="item.visibleTitle">
+                                        </v-card-title>
                                 <v-card-subtitle>
                                     {{ item.timestamp.split('T')[0] }}
                                 </v-card-subtitle>
@@ -72,10 +71,22 @@
             RefreshIcon,
         },
         props: {
-            'truncateAfterNChars': {
+            'textMaxLen': {
                 type: Number,
                 default: function () {
                     return 70;
+                }
+            },
+            'titleLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 22;
+                }
+            },
+            'titleOneLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 26;
                 }
             },
         },
@@ -164,6 +175,34 @@
                 });
                 return counter;
             },
+            truncateTitle(title) {
+                let visibleTitle='';
+                if (this.checkHtml(title) != 0){
+                    return visibleTitle;
+                }
+                if (title.length == this.titleOneLineMaxLen){
+                    visibleTitle = title;
+                    return visibleTitle;
+                }
+                let index;
+                for (index = this.titleLineMaxLen; index < title.length; index+=this.titleLineMaxLen) {
+                    visibleTitle += title.substring(index-this.titleLineMaxLen, index);
+                    visibleTitle += '-<br>';
+                }
+                visibleTitle += title.substring(index-this.titleLineMaxLen, title.length);
+                return visibleTitle;
+            },
+            checkHtml(string){
+                if (
+                    string.search('<') != -1 ||
+                    string.search('>') != -1 || 
+                    string.search('&lt;') != -1 ||
+                    string.search('&gt;') != -1
+                    ) {
+                        return -1;
+                    }
+                return 0;
+            },
             async updateNewsInEvidence() {
                 $.ajax({
                     url: this.newsInEvidenceUrl,
@@ -172,9 +211,10 @@
                     success: (response) => {
                         this.newsInEvidence = [];
                         response.forEach(news => {
-                            if (news.text.length > this.truncateAfterNChars) {
-                                news.text = news.text.slice(0, this.truncateAfterNChars) + '...';
+                            if (news.text.length > this.textMaxLen) {
+                                news.text = news.text.slice(0, this.textMaxLen) + '...';
                             }
+                            news.visibleTitle = this.truncateTitle(news.title);
                             this.newsInEvidence.push(news);
                         });
                         this.adjustNewsBatches();
