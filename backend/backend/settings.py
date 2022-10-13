@@ -52,13 +52,12 @@ STATICFILES_DIRS = (
 TINYMCE_DEFAULT_CONFIG = {
     'height': "960px",
     'width': "960px",
-    "menubar": "file edit view insert format tools table help",
-    'plugins': "insertdatetime media image preview link",
+    "menubar": "file edit view insert format help",
+    'plugins': "charmap codesample emoticons fullscreen help image insertdatetime link "
+    "lists media preview print save table",
     'toolbar': "undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft "
-    "aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor "
-    "backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | "
-    "fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | "
-    "a11ycheck ltr rtl | showcomments addcomment code",
+    "aligncenter alignright alignjustify | outdent indent table |  numlist bullist checklist | forecolor backcolor "
+    "casechange removeformat | charmap emoticons | fullscreen preview save print | image media codesample link ",
     'file_picker_types': "image media",
 }
 TINYMCE_SPELLCHECKER = True
