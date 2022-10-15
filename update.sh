@@ -105,7 +105,6 @@ revert () {
     fi
 
     git checkout --quiet -f "$UPSTREAM"
-    git fetch --all
     git reset --hard --quiet "origin/$UPSTREAM"
     
     echo "[*] Modifications reverted" 
