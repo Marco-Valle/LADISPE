@@ -64,7 +64,6 @@
                     'firstAssistant': this.course.first_assistant_id === 'None' ? null : { 'id': this.course.first_assistant_id },
                     'secondAssistant': this.course.second_assistant_id === 'None' ? null : { 'id': this.course.second_assistant_id },
                 },
-                userLang: navigator.language || navigator.userLanguage,
             }
         },
         props: {
@@ -88,6 +87,12 @@
                 type: Number,
                 default: function () {
                     return 26;
+                }
+            },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
                 }
             },
         },

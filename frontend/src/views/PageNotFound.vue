@@ -25,12 +25,15 @@
         data: function () {
             return {
                 picture: picture,
-                userLang: navigator.language || navigator.userLanguage,
+                userLang: this.$settings.userLang,
             }
         },
-        components: {
-
+        created() {
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
+            });
         },
+        components: {},
         methods: {}
     }
 </script>

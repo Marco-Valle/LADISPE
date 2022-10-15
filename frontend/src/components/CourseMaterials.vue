@@ -145,10 +145,15 @@
                 type: Object,
                 required: true
             },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
         },
         data: () => ({
             arrowsEnabled: true,
-            userLang: navigator.language || navigator.userLanguage,
         }),
         created(){
             this.emitter.on('updateMaterials', () => {

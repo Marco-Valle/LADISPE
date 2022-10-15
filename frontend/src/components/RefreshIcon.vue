@@ -20,9 +20,7 @@
     export default {
         name: 'LADIContacts',
         data: function () {
-            return {
-                userLang: navigator.language || navigator.userLanguage,
-            }
+            return {}
         },
         props: {
             'icon': {
@@ -35,6 +33,12 @@
                 type: String,
                 default: function () {
                     return null;
+                }
+            },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
                 }
             },
         },

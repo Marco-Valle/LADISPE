@@ -1,7 +1,7 @@
 <template>
     <v-container fluid class="border border-dark view-container" >
 
-        <RefreshIcon icon="mdi-file-pdf-box" clickEvent="updateForms" />
+        <RefreshIcon icon="mdi-file-pdf-box" clickEvent="updateForms" :userLang="userLang" />
         
         <v-row align="center" justify="center">
             <v-col cols="12" sm="10" md="8" lg="6" xl="6" xxl="6">
@@ -45,6 +45,7 @@
                 formsUrl: 'http://localhost/ladiforms/',
                 mediaUrl: 'http://localhost/storage/',
                 forms: [],
+                userLang: this.$settings.userLang,
             }
         },
         components: {
@@ -53,6 +54,9 @@
         created(){
             this.emitter.on('updateForms', () => {
                 this.updateForms();
+            });
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
             });
         },
         mounted() {

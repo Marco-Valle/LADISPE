@@ -3,12 +3,12 @@
 
         <v-row>
             <!-- Orari, telefono, fax, email & indirizzo-->
-            <Contacts />
+            <Contacts :userLang="userLang" />
         </v-row>
 
         <v-row>
             <!-- Staff -->
-            <Staff />
+            <Staff :userLang="userLang" />
         </v-row>
 
 </v-container>
@@ -21,7 +21,14 @@
     export default {
         name: 'ContactsView',
         data: function () {
-            return {}
+            return {
+                userLang: this.$settings.userLang,
+            }
+        },
+        created() {
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
+            });
         },
         components: {
             Contacts,

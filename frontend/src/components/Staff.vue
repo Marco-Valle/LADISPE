@@ -17,7 +17,7 @@
                     <div class="flex-div">
 
                         <StaffCard  v-for="item in staffs" :key="item.id"
-                                    :staff="item" />
+                                    :staff="item" :userLang="userLang" />
 
                     </div>
                 </v-row>
@@ -42,7 +42,14 @@
                 staffs: [],
             }
         },
-        props: {},
+        props: {
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
+        },
         components: {
             StaffCard,
             RefreshIcon,

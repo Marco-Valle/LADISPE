@@ -89,6 +89,12 @@
                     return 26;
                 }
             },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
         },
         data: () => ({
             newsInEvidence: [],
@@ -101,7 +107,6 @@
             api_base_url: 'http://localhost/',
             newsInEvidenceUrl: 'http://localhost/ladinews/?attributes=in_evidence&sort=desc',
             mediaUrl: 'http://localhost/storage/',
-            userLang: navigator.language || navigator.userLanguage,
         }),
         setup(){
             const { name } = useDisplay();

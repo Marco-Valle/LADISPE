@@ -10,6 +10,11 @@ loadFonts()
 const app = createApp(App)
 const emitter = mitt()
 
+// Site settings
+app.config.globalProperties.$settings = { 
+    'userLang': navigator.language || navigator.userLanguage,
+};
+
 // Allow to use a custom base_url for the api
 if (process.env.VUE_APP_URL != undefined && process.env.VUE_APP_URL !== ''){
     app.config.globalProperties.$base_url = `${process.env.VUE_APP_URL}/`;

@@ -23,6 +23,14 @@
                         {{ item.text }}
                     </v-list-item-title>
                 </v-list-item>
+                <v-list-item prepend-icon="mdi-translate" @click="updateLang();">
+                    <v-list-item-title v-if="userLang === 'it'">
+                        English version
+                    </v-list-item-title>
+                    <v-list-item-title v-else>
+                        Italian version
+                    </v-list-item-title>
+                </v-list-item>
             </v-list>
         </v-navigation-drawer>
 
@@ -159,6 +167,7 @@
             this.api_base_url = this.$api_base_url;
             this.checkDrawer();
             this.prepareMediaUrls();
+            this.userLang = this.$settings.userLang;
         },
         unmounted() {
             window.removeEventListener("resize", this.checkDrawer);
@@ -198,7 +207,13 @@
                         this.menu[index] = element;
                     }
                 });
-            }
+            },
+            updateLang() {
+                const newUserLang = (this.userLang == 'en') ? 'it' : 'en';
+                this.emitter.emit('updateLang', { 'lang': newUserLang });
+                this.userLang = newUserLang;
+                this.$settings.userLang = newUserLang;
+            },
         }
     }
 </script>

@@ -122,11 +122,16 @@
     export default {
         name: 'LADIContacts',
         data: function () {
-            return {
-                userLang: navigator.language || navigator.userLanguage,
-            }
+            return {}
         },
-        props: {},
+        props: {
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
+        },
         methods: {
             call(phoneN) {
                 window.open('tel:' + phoneN, '_self');

@@ -16,7 +16,7 @@
                align="center" justify="center">
             <v-col>
 
-                <Gallery    :galleryId="story.gallery" />
+                <Gallery :galleryId="story.gallery" />
 
             </v-col>
         </v-row>

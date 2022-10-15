@@ -38,7 +38,6 @@
             return {
                 storyUrl: 'story/?id=',
                 mediaUrl: 'http://localhost/storage/',
-                userLang: navigator.language || navigator.userLanguage,
                 visibleTitle: '',
             }
         },
@@ -57,6 +56,12 @@
                 type: Number,
                 default: function () {
                     return 26;
+                }
+            },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
                 }
             },
         },

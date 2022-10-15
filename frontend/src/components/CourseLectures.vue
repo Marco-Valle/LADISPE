@@ -76,6 +76,12 @@
                     return 26;
                 }
             },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
         },
         data: () => ({
             courseId: 0,
@@ -92,7 +98,6 @@
             lectureUrl: '/lecture/?id=',
             lecturesUrl: 'http://localhost/ladicourses/lectures/?',
             mediaUrl: 'http://localhost/storage/',
-            userLang: navigator.language || navigator.userLanguage,
         }),
         setup(){
             const { name } = useDisplay();

@@ -100,11 +100,16 @@
                 type: Object,
                 required: true
             },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
         },
         data: () => ({
             api_base_url: 'http://localhost/',
             mediaUrl: 'http://localhost/storage/',
-            userLang: navigator.language || navigator.userLanguage,
         }),
         setup(){
             const { name } = useDisplay();

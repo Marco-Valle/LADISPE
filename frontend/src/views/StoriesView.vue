@@ -4,7 +4,7 @@
         <v-row align="center" justify="start">
 
             <v-col cols="auto">
-                <RefreshIcon icon="mdi-book-outline" clickEvent="updateStories" />
+                <RefreshIcon icon="mdi-book-outline" clickEvent="updateStories" :userLang="userLang" />
             </v-col>
             <v-col cols="auto">
                 <v-select class="storySelector"
@@ -27,7 +27,7 @@
                 <div class="flex-div">
 
                     <StoryPreview v-for="item in stories"
-                                  :key="item.id" :story="item" />
+                                  :key="item.id" :story="item" :userLang="userLang" />
 
                 </div>
 
@@ -56,6 +56,7 @@
                     { 'text': '', 'textEN': 'Materials', 'textIT': 'Materiale', 'value': 'material_type' },
                 ],
                 storySelectedType: { 'text': '', 'textEN': 'All', 'textIT': 'Tutto', 'value': '' },
+                userLang: this.$settings.userLang,
             }
         },
         components: {
@@ -65,6 +66,10 @@
         created(){
             this.emitter.on('updateStories', () => {
                 this.updateStories();
+            });
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
+                this.updateLang();
             });
         },
         mounted() {
@@ -94,9 +99,8 @@
                 });
             },
             updateLang() {
-                const userLang = navigator.language || navigator.userLanguage;
                 this.storiesTypes.forEach((story, idx) => {
-                    if (userLang === 'it') {
+                    if (this.userLang === 'it') {
                         this.storiesTypes[idx].text = this.storiesTypes[idx].textIT;
                     } else {
                         this.storiesTypes[idx].text = this.storiesTypes[idx].textEN;

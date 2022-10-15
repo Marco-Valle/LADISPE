@@ -2,13 +2,13 @@
     <v-container fluid class="border border-dark view-container" >
 
             <v-row v-if="course.id >= 0 && course.title !== ''">
-                <CourseInfos :course="course" :staffs="staffs" />
+                <CourseInfos :course="course" :staffs="staffs" :userLang="userLang" />
             </v-row>
             <v-row>
-                <CourseLectures  :courseId="course.id" />
+                <CourseLectures  :courseId="course.id" :userLang="userLang" />
             </v-row>
             <v-row v-if="materials != null && (materials.length > 1 || (materials.length === 1 && materials[0].files.length !== 0))">
-                <CourseMaterials :materials="materials"/>
+                <CourseMaterials :materials="materials" :userLang="userLang" />
             </v-row>
 
     </v-container>
@@ -37,6 +37,7 @@
                     'secondAssistant': {},
                 },
                 materials: [],
+                userLang: this.$settings.userLang,
             }
         },
         components: {
@@ -47,6 +48,9 @@
         created() {
             this.emitter.on('updateMaterial', () => {
                 this.updateMaterial();
+            });
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
             });
         },
         mounted() {

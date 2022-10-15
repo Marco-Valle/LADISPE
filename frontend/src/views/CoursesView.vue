@@ -1,13 +1,13 @@
 <template>
     <v-container fluid class="border border-dark view-container" >
 
-        <RefreshIcon icon="mdi-bookshelf" clickEvent="updateCourses" />
+        <RefreshIcon icon="mdi-bookshelf" clickEvent="updateCourses" :userLang="userLang" />
 
         <!-- Standard div with flex properties, waiting for v-flex implementation on vuetify 3 -->
         <div class="flex-div">
 
             <CoursePreview v-for="item in courses" :key="item.course_code"
-                          :course="item" />
+                          :course="item" :userLang="userLang" />
 
         </div>
 
@@ -24,7 +24,7 @@
         name: 'CoursesView',
         data: function () {
             return {
-                userLang: navigator.language || navigator.userLanguage,
+                userLang: this.$settings.userLang,
                 api_base_url: 'http://localhost/',
                 coursesUrl: 'http://localhost/ladicourses/',
                 courses: [],
@@ -37,6 +37,9 @@
         created(){
             this.emitter.on('updateCourses', () => {
                 this.updateCourses();
+            });
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
             });
         },
         mounted() {

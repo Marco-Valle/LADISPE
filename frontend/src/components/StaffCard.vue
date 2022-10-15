@@ -51,13 +51,18 @@
             return {
                 api_base_url: 'http://localhost/',
                 mediaUrl: 'http://localhost/storage/',
-                userLang: navigator.language || navigator.userLanguage,
             }
         },
         props: {
             'staff': {
                 type: Object,
                 required: true
+            },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
             },
         },
         mounted(){
