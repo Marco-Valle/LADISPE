@@ -4,11 +4,11 @@
         <v-icon size="x-large" @click="clickEventHandler()">
             {{ icon }}
         </v-icon>
-        <span   v-if="userLang === 'it' && !isTouchDevice()"
+        <span   v-if="userLang === 'it' && !isTouchDevice() && tooltipEnabled"
                 class="tooltiptext">
                 clicca per ricaricare
         </span>
-        <span v-else-if="!isTouchDevice()" class="tooltiptext">
+        <span v-else-if="!isTouchDevice() && tooltipEnabled" class="tooltiptext">
                 click to refresh
         </span>
     </div>
@@ -41,6 +41,12 @@
                     return 'it';
                 }
             },
+            'tooltipEnabled': {
+                type: Boolean,
+                default: function () {
+                    return true;
+                }
+            },
         },
         methods: {
             clickEventHandler () {
@@ -48,7 +54,7 @@
                     this.emitter.emit(this.clickEvent);
                 }
             },
-            isTouchDevice() {
+            isTouchDevice () {
                 return ('ontouchstart' in window) ||
                     (navigator.maxTouchPoints > 0) ||
                     (navigator.msMaxTouchPoints > 0);
