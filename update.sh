@@ -56,8 +56,7 @@ help () {
 git_update () {
 
     if [ -z "$MODIFICATIONS" ]; then
-        # Already fetched before revert
-        git fetch --all 
+        # Already done
         git checkout --quiet $UPSTREAM
     fi
 
@@ -116,6 +115,8 @@ main () {
 
     args_parse "$@"
 
+    
+    echo "[*] $(git fetch --all)" 
     LOCAL=$(git rev-parse @)
     REMOTE=$(git rev-parse "origin/$UPSTREAM")
     BASE=$(git merge-base @ "origin/$UPSTREAM")
