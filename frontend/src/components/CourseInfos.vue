@@ -44,7 +44,7 @@
 
                 <v-row align="center" justify="center">
 
-                    <v-table    v-if="userLang === 'it'" class="course-table"
+                    <v-table    class="course-table"
                                 :style="{   'margin-bottom': `${this.isLargeScreen ? '0px' : '10px'}`}" >
                         <tbody v-if="userLang === 'it'">
                             <tr v-for="(staff, index) in staffs" :key="index">
