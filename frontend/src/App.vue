@@ -162,6 +162,9 @@
             window.addEventListener('gesturechange', this.preventZoom);
             window.addEventListener('gestureend', this.preventZoom);
             window.addEventListener('touchstart', this.preventZoom);
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;
