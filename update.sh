@@ -57,34 +57,46 @@ git_update () {
 
     if [ $REMOTE = $BASE ]; then
         # Already fetched before revert
-        git fetch --all
+        git fetch --all 
+        git checkout $UPSTREAM
     fi
 
-    git checkout $UPSTREAM
     git pull
+    echo "[*] Code pulling completed"
 }
 
 remove_dockers () {
 
+    echo '[*] Removing old versions of the dockers'
+    
     if [[ $RECREATE_DB -eq 1 ]]; then
         postgres_id=$(docker container ls --all | grep postgres | cut -d' ' -f1)
         postgres_image_id=$(docker image ls | grep postgres |  cut -d' ' -f14)
-        if [ $postgres_id -df '' ]; then docker container rm ${postgres_id}; fi
-        if [ $postgres_image_id -df '' ]; then docker image rm ${postgres_image_id}; fi
+        if [ ! -z "$postgres_id" ]; then docker container rm "postgres_id"; fi
+        if [ ! -z "$postgres_image_id" ]; then docker image rm "postgres_image_id"; fi
     fi
 
     nginx_id=$(docker container ls --all | grep nginx | cut -d' ' -f1)
     nginx_image_id=$(docker image ls | grep nginx |  cut -d' ' -f14)
-    if [ $nginx_id -df '' ]; then docker container rm $nginx_id; fi
-    if [ $nginx_image_id -df '' ]; then docker image rm $nginx_image_id; fi
+    if [ ! -z "$nginx_id" ]; then docker container rm "$nginx_id"; fi
+    if [ ! -z "$nginx_image_id" ]; then docker image rm "$nginx_image_id"; fi
     
     backend_id=$(docker container ls --all | grep backend | cut -d' ' -f1)
     backend_image_id=$(docker image ls | grep backend |  cut -d' ' -f12)
-    if [ $backend_id -df '' ]; then docker container rm $backend_id; fi
-    if [ $backend_image_id -df '' ]; then docker image rm $backend_image_id; fi
+    if [ ! -z "$backend_id" ]; then docker container rm "$backend_id"; fi
+    if [ ! -z "$backend_image_id" ]; then docker image rm "$backend_image_id"; fi
+
+    echo '[*] Old versions of the dockers removed'
 }
 
 revert () {
+
+    modifications=$(git status | grep 'modified:')
+    old_branch=$(git status | grep 'On branch' | sed 's/On branch //')
+    echo
+    echo "Actually on branch: $old_branch"
+    echo  "$modifications"
+    echo
 
     if [[ $ASK -eq 1 ]]; then 
         read -p "Revert local changes? y/N? " -n 1 -r
@@ -95,9 +107,11 @@ revert () {
         fi
     fi
 
-    exit 0
+    git checkout --quiet -f "$UPSTREAM"
     git fetch --all
-    git reset --hard "origin/$UPSTREAM"
+    git reset --hard --quiet "origin/$UPSTREAM"
+    
+    echo "[*] Modifications reverted" 
 }
 
 main () {
@@ -113,7 +127,7 @@ main () {
         exit 0
     elif [ $LOCAL = $BASE ]; then
         echo "[*] Need to pull"
-    else [ $REMOTE = $BASE ]
+    else
         echo "[!] Need to revert changes"
         revert
     fi
@@ -121,7 +135,12 @@ main () {
     docker-compose --file docker-compose.prod.yml down
     remove_dockers
     git_update
+
+    echo '[*] Trying to run the new version of the dockers'
     docker-compose --file docker-compose.prod.yml up -d --force-recreate
+
+    echo '[*] Done'
+    exit 0
 
 }
 
