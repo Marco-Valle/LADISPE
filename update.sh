@@ -86,8 +86,6 @@ remove_dockers () {
 
 revert () {
 
-    echo "UP $UPSTREAM"
-
     if [[ $ASK -eq 1 ]]; then 
         read -p "Revert local changes? y/N? " -n 1 -r
         echo
