@@ -12,7 +12,7 @@
                             cycle hide-delimiter-background
                             :show-arrows="lecturesSettings.showArrows">
 
-                    <v-carousel-item v-for="(group, index) in lecturesInBatches" :key="`G${index}`" height="450">
+                    <v-carousel-item v-for="(group, index) in lecturesInBatches" :key="`G${index}`" height="475">
 
                         <div class="carousel-div" >
 
