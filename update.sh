@@ -128,9 +128,13 @@ main () {
         exit 0
     elif [ $LOCAL = $BASE ]; then
         echo "[*] Need to pull"
-    elif [ ! -z "$MODIFICATIONS" ]; then
-        echo "[!] Need to revert changes"
-        revert
+    else
+        if [ -z "$MODIFICATIONS" ]; then
+            echo "[!] Need to revert changes"
+            revert
+        else
+            echo "[!] Need to checkout"
+        fi
     fi
 
     docker-compose --file docker-compose.prod.yml down
