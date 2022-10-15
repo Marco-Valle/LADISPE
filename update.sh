@@ -114,7 +114,6 @@ main () {
 
     args_parse "$@"
 
-    
     echo "[*] $(git fetch --all)" 
     LOCAL=$(git rev-parse @)
     REMOTE=$(git rev-parse "origin/$UPSTREAM")
