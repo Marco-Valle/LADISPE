@@ -55,10 +55,10 @@ help () {
 
 git_update () {
 
-    if [ $REMOTE = $BASE ]; then
+    if [ -z "$MODIFICATIONS" ]; then
         # Already fetched before revert
         git fetch --all 
-        git checkout $UPSTREAM
+        git checkout --quiet $UPSTREAM
     fi
 
     git pull
@@ -91,11 +91,9 @@ remove_dockers () {
 
 revert () {
 
-    modifications=$(git status | grep 'modified:')
-    old_branch=$(git status | grep 'On branch' | sed 's/On branch //')
     echo
-    echo "Actually on branch: $old_branch"
-    echo  "$modifications"
+    echo "Actually on branch: $OLD_BRANCH"
+    echo  "$MODIFICATIONS"
     echo
 
     if [[ $ASK -eq 1 ]]; then 
@@ -122,12 +120,15 @@ main () {
     REMOTE=$(git rev-parse "origin/$UPSTREAM")
     BASE=$(git merge-base @ "origin/$UPSTREAM")
 
+    MODIFICATIONS=$(git status | grep 'modified:')
+    OLD_BRANCH=$(git status | grep 'On branch' | sed 's/On branch //')
+
     if [ $LOCAL = $REMOTE ]; then
         echo "[*] Up-to-date"
         exit 0
     elif [ $LOCAL = $BASE ]; then
         echo "[*] Need to pull"
-    else
+    elif [ ! -z "$MODIFICATIONS" ]; then
         echo "[!] Need to revert changes"
         revert
     fi
