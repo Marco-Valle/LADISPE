@@ -42,6 +42,7 @@ args_parse () {
 
 change_branch () {
 
+    echo "[!] Need to checkout"
     if [[ $ASK -eq 1 ]]; then 
         read -p "Switch branch ($OLD_BRANCH -> $UPSTREAM) ? y/N? " -n 1 -r
         echo
@@ -133,17 +134,19 @@ main () {
     MODIFICATIONS=$(git status | grep 'modified:')
     OLD_BRANCH=$(git status | grep 'On branch' | sed 's/On branch //')
 
-    if [ $LOCAL = $REMOTE ]; then
+    if [ "$LOCAL" = "$REMOTE" ]; then
         echo "[*] Up-to-date"
         exit 0
-    elif [ $LOCAL = $BASE ]; then
+    elif [ "$LOCAL" = "$BASE" ]; then
+        if [ "$UPSTREAM" != "$OLD_BRANCH" ]; then
+            change_branch
+        fi
         echo "[*] Need to pull"
     else
         if [ ! -z "$MODIFICATIONS" ]; then
             echo "[!] Need to revert changes"
             revert
         else
-            echo "[!] Need to checkout"
             change_branch
         fi
     fi
