@@ -4,11 +4,9 @@
                class="elevation-4 main-row">
             <!-- Staff -->
             <v-col>
-                <v-row>
+                <v-row justify="center" align="center">
                     <v-col md="1">
-                        <v-icon size="x-large" @click="updateStaffs()" id="staff-icon" >
-                            mdi-account-group-outline
-                        </v-icon>
+                        <RefreshIcon icon="mdi-account-group-outline" clickEvent="updateStaffs" />
                     </v-col>
                     <v-col>
                         <h3 id="staff-title" >LADI staff</h3>
@@ -19,10 +17,7 @@
                     <div class="flex-div">
 
                         <StaffCard  v-for="item in staffs" :key="item.id"
-                                    :staff="item"
-                                    :buttonsColor="buttonsColor"
-                                    :boxsBorderRadius="boxsBorderRadius"
-                                    :cardsColor="cardsColor" />
+                                    :staff="item" :userLang="userLang" />
 
                     </div>
                 </v-row>
@@ -34,6 +29,7 @@
 <script>
 
     import StaffCard from '@/components/StaffCard.vue';
+    import RefreshIcon from '@/components/RefreshIcon.vue';
     import $ from "jquery";
 
     export default {
@@ -46,9 +42,22 @@
                 staffs: [],
             }
         },
-        props: {},
+        props: {
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
+        },
         components: {
             StaffCard,
+            RefreshIcon,
+        },
+        created(){
+            this.emitter.on('updateStaffs', () => {
+                this.updateStaffs();
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;

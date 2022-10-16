@@ -44,7 +44,7 @@
 
                 <v-row align="center" justify="center">
 
-                    <v-table    v-if="userLang === 'it'" class="course-table"
+                    <v-table    class="course-table"
                                 :style="{   'margin-bottom': `${this.isLargeScreen ? '0px' : '10px'}`}" >
                         <tbody v-if="userLang === 'it'">
                             <tr v-for="(staff, index) in staffs" :key="index">
@@ -54,7 +54,9 @@
                                     <p v-else>Secondo Assistente</p>
                                 </td>
                                 <td v-if="staff != undefined">{{ staff.fullname }}</td>
-                                <td v-if="staff != undefined"><a :href="`mailto:${ staff.email }`">{{ staff.email }}</a></td>
+                                <td v-if="staff != undefined">
+                                    <a class="site-anchor" :href="`mailto:${ staff.email }`">{{ staff.email }}</a>
+                                </td>
                             </tr>
                         </tbody>
                         <tbody v-else>
@@ -65,7 +67,9 @@
                                     <p v-else>Second Assistant</p>
                                 </td>
                                 <td v-if="staff != undefined">{{ staff.fullname }}</td>
-                                <td v-if="staff != undefined"><a :href="`mailto:${ staff.email }`">{{ staff.email }}</a></td>
+                                <td v-if="staff != undefined">
+                                    <a class="site-anchor" :href="`mailto:${ staff.email }`">{{ staff.email }}</a>
+                                </td>
                             </tr>
                         </tbody>
                     </v-table>
@@ -96,11 +100,16 @@
                 type: Object,
                 required: true
             },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
         },
         data: () => ({
             api_base_url: 'http://localhost/',
             mediaUrl: 'http://localhost/storage/',
-            userLang: navigator.language || navigator.userLanguage,
         }),
         setup(){
             const { name } = useDisplay();

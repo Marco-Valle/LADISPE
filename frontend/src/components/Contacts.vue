@@ -58,7 +58,8 @@
                             Address
                         </h3>
                         <p class="info-paragraph">
-                            <a href="geo:7.662360,45.062450?q=LADISPE+POLITO">
+                            <a  class="site-anchor"
+                                href="geo:7.662360,45.062450?q=LADISPE+POLITO">
                                 Laboratorio LADISPE <br />
                                 C/O DAUIN - Politecnico di Torino <br />
                                 Corso Duca degli Abruzzi 24 <br />
@@ -83,7 +84,10 @@
                             Phone and Fax
                         </h3>
                         <p class="info-paragraph">
-                            <a href="tel:00390110907045">Tel: (+39) 011 090 7045</a><br />
+                            <a  class="site-anchor"
+                                href="tel:00390110907045">
+                                Tel: (+39) 011 090 7045
+                            </a><br />
                             Fax: (+39) 011 090 7099
 
                         </p>
@@ -98,7 +102,8 @@
                             Email
                         </h3>
                         <p class="info-paragraph">
-                            <a href="mailto:ladispe@polito.it">
+                            <a  class="site-anchor"
+                                href="mailto:ladispe@polito.it">
                                 ladispe@polito.it
                             </a>
                         </p>
@@ -117,11 +122,16 @@
     export default {
         name: 'LADIContacts',
         data: function () {
-            return {
-                userLang: navigator.language || navigator.userLanguage,
-            }
+            return {}
         },
-        props: {},
+        props: {
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
+        },
         methods: {
             call(phoneN) {
                 window.open('tel:' + phoneN, '_self');

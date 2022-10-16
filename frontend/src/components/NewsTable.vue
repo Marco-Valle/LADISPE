@@ -101,7 +101,7 @@
                         display: function (row) {
                             return (
                                 '<h4 id="newsTable-' + row.id + '" align="center">' +
-                                '<a href = "'+ row.link +'" data - id="' + row.id +
+                                '<a class="site-anchor" href = "'+ row.link +'" data - id="' + row.id +
                                 '" style="text-decoration: none; color: #003576";>' +
                                 row.title +
                                 "</a></h4>"

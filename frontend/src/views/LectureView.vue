@@ -14,11 +14,7 @@
             <v-col>
 
                 <v-card elevation="2" class="border border-dark story-card" >
-                    <v-card-content>
-
-                        <span class="story-span" v-html="lecture.html" />
-
-                    </v-card-content>
+                    <span class="story-span" v-html="lecture.html" />
                 </v-card>
 
             </v-col>

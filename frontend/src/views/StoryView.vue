@@ -16,7 +16,7 @@
                align="center" justify="center">
             <v-col>
 
-                <Gallery    :galleryId="story.gallery" />
+                <Gallery :galleryId="story.gallery" />
 
             </v-col>
         </v-row>
@@ -26,15 +26,13 @@
 
                 <v-card elevation="2"
                         class="border border-dark story-card" >
-                    <v-card-content>
+                        
+                    <span class="story-span" v-html="story.html" />
+                    <p v-if="story.quote !== 'None'"
+                        class="story-quote">
+                        {{ story.quote }}
+                    </p>
 
-                        <span class="story-span" v-html="story.html" />
-                        <p v-if="story.quote !== 'None'"
-                           class="story-quote">
-                            {{ story.quote }}
-                        </p>
-
-                    </v-card-content>
                 </v-card>
             </v-col>
         </v-row>

@@ -6,8 +6,7 @@
                alt="story.title"
                :src="mediaUrl + story.cover" />
 
-        <v-card-title>
-            {{ story.title }}
+        <v-card-title v-html="visibleTitle">
         </v-card-title>
 
         <v-card-subtitle v-if="story.author !== ''">
@@ -39,7 +38,7 @@
             return {
                 storyUrl: 'story/?id=',
                 mediaUrl: 'http://localhost/storage/',
-                userLang: navigator.language || navigator.userLanguage,
+                visibleTitle: '',
             }
         },
         props: {
@@ -47,11 +46,58 @@
                 type: Object,
                 required: true
             },
+            'titleLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 22;
+                }
+            },
+            'titleOneLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 26;
+                }
+            },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
         },
         mounted() {
             this.mediaUrl = `${this.$base_url}${process.env.VUE_APP_MEDIA_URL_PREFIX}`;
+            this.truncateTitle();
         },
-        methods: {},
+        methods: {
+            
+            truncateTitle() {
+                if (this.checkHtml(this.story.title) != 0){
+                    return;
+                }
+                if (this.story.title.length == this.titleOneLineMaxLen){
+                    this.visibleTitle = this.story.title;
+                    return;
+                }
+                let index;
+                for (index = this.titleLineMaxLen; index < this.story.title.length; index+=this.titleLineMaxLen) {
+                    this.visibleTitle += this.story.title.substring(index-this.titleLineMaxLen, index);
+                    this.visibleTitle += '-<br>';
+                }
+                this.visibleTitle += this.story.title.substring(index-this.titleLineMaxLen, this.story.title.length);
+            },
+            checkHtml(string){
+                if (
+                    string.search('<') != -1 ||
+                    string.search('>') != -1 || 
+                    string.search('&lt;') != -1 ||
+                    string.search('&gt;') != -1
+                    ) {
+                        return -1;
+                    }
+                return 0;
+            },
+        },
     }
 </script>
 

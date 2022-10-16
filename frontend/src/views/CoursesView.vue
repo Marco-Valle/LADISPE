@@ -1,13 +1,13 @@
 <template>
     <v-container fluid class="border border-dark view-container" >
 
-        <v-icon size="x-large" @click="updateCourses()">mdi-bookshelf</v-icon>
+        <RefreshIcon icon="mdi-bookshelf" clickEvent="updateCourses" :userLang="userLang" />
 
         <!-- Standard div with flex properties, waiting for v-flex implementation on vuetify 3 -->
         <div class="flex-div">
 
             <CoursePreview v-for="item in courses" :key="item.course_code"
-                          :course="item" />
+                          :course="item" :userLang="userLang" />
 
         </div>
 
@@ -17,12 +17,14 @@
 <script>
 
     import CoursePreview from '@/components/CoursePreview.vue';
+    import RefreshIcon from '@/components/RefreshIcon.vue';
     import $ from "jquery";
 
     export default {
         name: 'CoursesView',
         data: function () {
             return {
+                userLang: this.$settings.userLang,
                 api_base_url: 'http://localhost/',
                 coursesUrl: 'http://localhost/ladicourses/',
                 courses: [],
@@ -30,6 +32,15 @@
         },
         components: {
             CoursePreview,
+            RefreshIcon,
+        },
+        created(){
+            this.emitter.on('updateCourses', () => {
+                this.updateCourses();
+            });
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;

@@ -6,7 +6,7 @@
             
             <v-col>
 
-                <v-icon size="x-large" @click="updateMaterials()">mdi-bookshelf</v-icon>
+                <RefreshIcon icon="mdi-bookshelf" clickEvent="updateMaterials" />
                 <v-spacer />
 
                 <v-carousel hide-delimiters :progress="progressBarColor" :show-arrows="arrowsEnabled">
@@ -78,7 +78,8 @@
                                         <tbody v-if="material.files.length !== 0">
                                             <tr v-for="(file, index) in material.files" :key="`F${index}`">
                                                 <td>
-                                                    <a :href="file.url" target="_blank">
+                                                    <a  class="site-anchor"
+                                                        :href="file.url" target="_blank">
                                                         {{ file.name }}
                                                     </a>
                                                 </td>
@@ -113,11 +114,13 @@
 <script>
 
     import CourseMaterialsCrumbs from '@/components/CourseMaterialsCrumbs.vue';
+    import RefreshIcon from '@/components/RefreshIcon.vue';
 
     export default {
         name: 'CourseInfos',
         components: {
             CourseMaterialsCrumbs,
+            RefreshIcon,
         },
         props: {
             'boxsBorderRadius': {
@@ -142,11 +145,21 @@
                 type: Object,
                 required: true
             },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
         },
         data: () => ({
             arrowsEnabled: true,
-            userLang: navigator.language || navigator.userLanguage,
         }),
+        created(){
+            this.emitter.on('updateMaterials', () => {
+                this.updateMaterials();
+            });
+        },
         mounted() {
             this.arrowsEnabled = !this.isTouchDevice();
         },

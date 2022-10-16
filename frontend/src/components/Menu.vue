@@ -24,6 +24,18 @@
 
             </v-col>
         </v-row>
+        <v-row justify="center">
+            <v-col class="menu-column">
+                
+                <v-btn  elevation="5" outlined class="my-button"
+                        @click="updateLang()">
+                        <v-icon size="large" class="menu-icon">
+                            mdi-translate
+                        </v-icon>
+                </v-btn>
+
+            </v-col>
+        </v-row>
 
     </v-container>
 </template>
@@ -34,7 +46,7 @@
         name: 'LADIMenu',
         data: function () {
             return {
-                userLang: navigator.language || navigator.userLanguage,
+                userLang: this.$settings.userLang,
             }
         },
         props: {
@@ -45,7 +57,13 @@
                 }
             },
         },
-         methods: {
+        methods: {
+            updateLang() {
+                const newUserLang = (this.userLang == 'en') ? 'it' : 'en';
+                this.emitter.emit('updateLang', { 'lang': newUserLang });
+                this.userLang = newUserLang;
+                this.$settings.userLang = newUserLang;
+            },
             openUrl(url) {
                 if (url === '') { return; }
                 window.open(url).focus();

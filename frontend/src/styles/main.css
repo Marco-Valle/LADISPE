@@ -1,3 +1,8 @@
+.site-anchor {
+    text-decoration: none;
+    color: inherit;
+}
+
 .carousel-div {
     display: flex;
     flex-flow: row nowrap;
@@ -57,11 +62,6 @@
 .view-container {
     background-color: #eeeeee;
     border-radius: 15px;
-}
-
-a {
-    text-decoration: none;
-    color: inherit;
 }
 
 v-card-text {

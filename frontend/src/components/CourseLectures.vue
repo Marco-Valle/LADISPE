@@ -5,13 +5,14 @@
             <!-- Lectures -->
             <v-col>
 
-                <v-icon size="x-large" @click="updateLectures()">mdi-book</v-icon>
+                <RefreshIcon icon="mdi-book" clickEvent="updateLectures" />
                 <v-spacer />
 
-                <v-carousel hide-delimiters class="my-carousel"
+                <v-carousel class="my-carousel"  
+                            cycle hide-delimiter-background
                             :show-arrows="lecturesSettings.showArrows">
 
-                    <v-carousel-item v-for="(group, index) in lecturesInBatches" :key="`G${index}`" height="450">
+                    <v-carousel-item v-for="(group, index) in lecturesInBatches" :key="`G${index}`" height="475">
 
                         <div class="carousel-div" >
 
@@ -22,8 +23,7 @@
                                 <v-img height="250"
                                        alt="item.title"
                                        :src="mediaUrl + item.cover" />
-                                <v-card-title>
-                                    {{ item.title }}
+                                <v-card-title v-html="item.visibleTitle">
                                 </v-card-title>
                                 <v-card-subtitle>
                                     {{ item.timestamp.split('T')[0] }}
@@ -53,14 +53,36 @@
 
 <script>
 
+    import RefreshIcon from '@/components/RefreshIcon.vue';
     import $ from "jquery";
     import { computed } from "vue";
     import { useDisplay } from "vuetify";
 
     export default {
         name: 'CourseLectures',
-        components: {},
-        props: {},
+        components: {
+            RefreshIcon,
+        },
+        props: {
+            'titleLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 22;
+                }
+            },
+            'titleOneLineMaxLen': {
+                type: Number,
+                default: function () {
+                    return 26;
+                }
+            },
+            'userLang': {
+                type: String,
+                default: function () {
+                    return 'it';
+                }
+            },
+        },
         data: () => ({
             courseId: 0,
             lectures: [],
@@ -76,7 +98,6 @@
             lectureUrl: '/lecture/?id=',
             lecturesUrl: 'http://localhost/ladicourses/lectures/?',
             mediaUrl: 'http://localhost/storage/',
-            userLang: navigator.language || navigator.userLanguage,
         }),
         setup(){
             const { name } = useDisplay();
@@ -98,6 +119,9 @@
         created() {
             window.addEventListener("resize", this.adjustLecturesBatches);
             window.addEventListener("orientationchange", this.adjustLecturesBatches);
+            this.emitter.on('updateLectures', () => {
+                this.updateLectures();
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;
@@ -143,6 +167,34 @@
                 });
                 return counter;
             },
+            truncateTitle(title) {
+                let visibleTitle='';
+                if (this.checkHtml(title) != 0){
+                    return visibleTitle;
+                }
+                if (title.length == this.titleOneLineMaxLen){
+                    visibleTitle = title;
+                    return visibleTitle;
+                }
+                let index;
+                for (index = this.titleLineMaxLen; index < title.length; index+=this.titleLineMaxLen) {
+                    visibleTitle += title.substring(index-this.titleLineMaxLen, index);
+                    visibleTitle += '-<br>';
+                }
+                visibleTitle += title.substring(index-this.titleLineMaxLen, title.length);
+                return visibleTitle;
+            },
+            checkHtml(string){
+                if (
+                    string.search('<') != -1 ||
+                    string.search('>') != -1 || 
+                    string.search('&lt;') != -1 ||
+                    string.search('&gt;') != -1
+                    ) {
+                        return -1;
+                    }
+                return 0;
+            },
             async updateLectures() {
                 if (this.courseId <= 0) { return; }
                 $.ajax({
@@ -150,7 +202,12 @@
                     type: "get",
                     dataType: "json",
                     success: (response) => {
-                        this.lectures = [...response];
+                        this.lectures = [];
+                        this.newsInEvidence = [];
+                        response.forEach(lecture => {
+                            lecture.visibleTitle = this.truncateTitle(lecture.title);
+                            this.lectures.push(lecture);
+                        });
                         this.adjustLecturesBatches();
                     },
                     error: (jqXHR, textStatus, errorThrown) => {

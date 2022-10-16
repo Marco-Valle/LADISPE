@@ -1,7 +1,8 @@
 <template>
     <v-container fluid class="border border-dark view-container" >
 
-        <v-icon size="x-large" @click="updateForms()">mdi-file-pdf-box</v-icon>
+        <RefreshIcon icon="mdi-file-pdf-box" clickEvent="updateForms" :userLang="userLang" />
+        
         <v-row align="center" justify="center">
             <v-col cols="12" sm="10" md="8" lg="6" xl="6" xxl="6">
 
@@ -15,7 +16,8 @@
                         <template v-slot:prepend>
                             <v-icon icon="mdi-file-pdf-box"></v-icon>
                         </template>
-                        <a :href="mediaUrl + item.file" target="_blank">   
+                        <a  class="site-anchor"
+                            :href="mediaUrl + item.file" target="_blank">   
                             <v-list-item-title>
                                 {{ item.title }}
                             </v-list-item-title>
@@ -31,6 +33,8 @@
 </template>
 
 <script>
+    
+    import RefreshIcon from '@/components/RefreshIcon.vue';
     import $ from "jquery";
 
     export default {
@@ -41,9 +45,19 @@
                 formsUrl: 'http://localhost/ladiforms/',
                 mediaUrl: 'http://localhost/storage/',
                 forms: [],
+                userLang: this.$settings.userLang,
             }
         },
         components: {
+            RefreshIcon,
+        },
+        created(){
+            this.emitter.on('updateForms', () => {
+                this.updateForms();
+            });
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
+            });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;

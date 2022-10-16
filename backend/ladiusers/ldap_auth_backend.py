@@ -17,15 +17,14 @@ class CustomLDAPBackend(ModelBackend):
         
         try:
             ldap_conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI)
+            ldap_conn.simple_bind_s(username, password)
+            ldap_user = ldap_conn.search_s(settings.AUTH_LDAP_USER_SEARCH, ldap.SCOPE_SUBTREE, f'mail={username}')[0][1]
+        except ldap.INVALID_CREDENTIALS:
+            return None
         except ldap.SERVER_DOWN:
             logger.warning("LDAP server unreachable.")
             return None
-        try:
-            ldap_conn.simple_bind_s(username, password)
-        except ldap.INVALID_CREDENTIALS:
-            return None
-        
-        ldap_user = ldap_conn.search_s(settings.AUTH_LDAP_USER_SEARCH, ldap.SCOPE_SUBTREE, f'mail={username}')[0][1]
+
         try:
             user = User.objects.get(email=username)
             user.set_password(password)

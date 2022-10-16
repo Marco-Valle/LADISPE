@@ -12,7 +12,7 @@ class LADINews(models.Model):
 
     timestamp = models.DateTimeField(auto_now=True)
     cover = models.ImageField(upload_to='news/%Y/%m/%d/', default='default.png')
-    title = models.CharField(max_length=30)
+    title = models.CharField(max_length=50)
     link = models.URLField(max_length=200, blank=True, null=True)
     in_evidence = models.BooleanField(default=False)
     text = models.TextField(blank=True, help_text="Use &lt;br&gt; to break the line")

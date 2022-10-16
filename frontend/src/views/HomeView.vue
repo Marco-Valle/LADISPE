@@ -13,7 +13,7 @@
         <v-row>
             <!-- News in evidence -->
             <InEvidenceNews class="home-box"
-                            :truncateAfterNChars="70" />
+                            :truncateAfterNChars="70"  :userLang="userLang" />
         </v-row>
 
         <v-spacer />
@@ -34,14 +34,20 @@
     export default {
         name: 'HomeView',
         data: function () {
-            return {}
+            return {
+                userLang: this.$settings.userLang,
+            }
         },
         components: {
             NewsTable,
             Gallery,
             InEvidenceNews,
         },
-        mounted() {},
+        created() {
+            this.emitter.on('updateLang', (evt) => {
+                this.userLang = evt.lang;
+            });
+        },
         methods: {}
     }
 </script>
