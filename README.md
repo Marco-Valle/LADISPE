@@ -185,4 +185,4 @@ Not all the API requests are managed by the database functions, therefore it is 
 ### LADIUsers
 LADIUsers is addressed to provide information about the users of the application.
 Only superusers can fetch information regarding other users than theirself, but there is an exception: when a user is also LADIStaff, his information are public.
-- api/ladiuser/ : only *id* is accepted as parameters and it is used to specify the id of the user of who the information are required
+- api/ladiuser/ : only *id* is accepted as parameters and it is used to specify the id of the user whose the information are required
