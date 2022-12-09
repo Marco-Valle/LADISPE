@@ -87,10 +87,18 @@
                 {
                     text: 'Stories',
                     textIT: 'Storie',
-                    to: '/stories',
+                    to: '/stories/story',
                     staticUrl: '',
                     isMediaUrl: false,
                     icon: 'mdi-book',
+                },
+                {
+                    text: 'Materials',
+                    textIT: 'Materiale',
+                    to: '/stories/material',
+                    staticUrl: '',
+                    isMediaUrl: false,
+                    icon: 'mdi-desktop-classic ',
                 },
                 {
                     text: 'Courses',

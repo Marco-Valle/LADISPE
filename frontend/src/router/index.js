@@ -9,7 +9,7 @@ const routes = [
         component: HomeView
     },
     {
-        path: '/stories',
+        path: '/stories/:storyType?',
         name: 'stories',
         component: () => import('@/views/StoriesView.vue')
     },

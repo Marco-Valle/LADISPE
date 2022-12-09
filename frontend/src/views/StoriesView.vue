@@ -71,17 +71,20 @@
                 this.userLang = evt.lang;
                 this.updateLang();
             });
+            this.$watch(() => this.$route.params, () => { 
+            this.selectStoryType(); this.updateStories(); });
         },
         mounted() {
             this.api_base_url = this.$api_base_url;
             this.storiesUrl = `${this.api_base_url}ladistories/?attributes=light`;
             this.updateLang();
+            this.selectStoryType();
             this.updateStories();
         },
         watch: {
             storySelectedType() {
                 this.updateStories();
-            }
+            },
         },
         methods: {
             async updateStories() {
@@ -106,6 +109,17 @@
                         this.storiesTypes[idx].text = this.storiesTypes[idx].textEN;
                     }
                 });
+            },
+            selectStoryType() {
+                if (this.$route.params.storyType === '') { return }
+                var apiType = 'story_type';
+                if (this.$route.params.storyType === 'story') { apiType = 'story_type' }
+                else if (this.$route.params.storyType === 'material') { apiType = 'material_type' }
+                else { return }
+                const storyType = this.storiesTypes.find(item => {
+                    return item.value ===  apiType;
+                });
+                this.storySelectedType = storyType;
             },
         }
     }
