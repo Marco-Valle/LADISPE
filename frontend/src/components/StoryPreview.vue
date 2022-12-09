@@ -36,7 +36,7 @@
         name: 'StoryPreview',
         data: function () {
             return {
-                storyUrl: 'story/?id=',
+                storyUrl: '/story/?id=',
                 mediaUrl: 'http://localhost/storage/',
                 visibleTitle: '',
             }
