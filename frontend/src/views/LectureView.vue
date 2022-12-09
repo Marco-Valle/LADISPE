@@ -98,5 +98,6 @@
 <style scoped>
 
     @import "@/styles/main.css";
+    @import "@/styles/code.css";
 
 </style>

@@ -1,0 +1,12 @@
+[class^="language-"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #eeeeee;
+    border: solid 1px black;
+}
+
+code {
+    font-family: MyFancyCustomFont, monospace;
+    font-size: 20px;
+    line-height: 1.5;
+}

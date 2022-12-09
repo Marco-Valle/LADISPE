@@ -102,6 +102,7 @@
 <style scoped>
 
     @import "@/styles/main.css";
+    @import "@/styles/code.css";
 
     .story-quote {
         text-align: right;
