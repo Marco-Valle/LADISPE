@@ -15,7 +15,7 @@
                         :loop="slidesLoop"
                         grab-cursor >
 
-                    <SwiperSlide v-for="item in pictures" :key="item.id" :virtualIndex="index">
+                    <SwiperSlide v-for="item in pictures" :key="item.id" :virtualIndex="galleryIndex">
 
                         <a  class="site-anchor"
                             :href="item.news_id == null ? item.link : redirectOnClick"
@@ -72,6 +72,7 @@
         data: () => ({
             pictures: [],
             galleryId: 0,
+            galleryIndex: 0,
             api_base_url: 'http://localhost/',
             picturesUrl: 'http://localhost/ladipictures/',
             galleriesUrl: 'http://localhost/ladigalleries/',
