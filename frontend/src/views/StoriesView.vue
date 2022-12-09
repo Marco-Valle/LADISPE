@@ -84,6 +84,7 @@
         watch: {
             storySelectedType() {
                 this.updateStories();
+                this.updateUrl();
             },
         },
         methods: {
@@ -109,6 +110,15 @@
                         this.storiesTypes[idx].text = this.storiesTypes[idx].textEN;
                     }
                 });
+            },
+            updateUrl() {
+                if (this.storySelectedType.value === 'story_type') {
+                    this.$router.push({ name: 'stories', params: { storyType: 'story' } });
+                } else if (this.storySelectedType.value === 'material_type') {
+                    this.$router.push({ name: 'stories', params: { storyType: 'material' } });
+                } else {
+                    this.$router.push({ name: 'stories', params: {} });
+                }
             },
             selectStoryType() {
                 if (this.$route.params.storyType === '') { return }
