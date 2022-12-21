@@ -3,6 +3,10 @@
     position: relative;
     display: inline-block;
   }
+
+  .tooltip-icon {
+    color: #003576;
+  }
   
   /* Tooltip text */
   .tooltip .tooltiptext {

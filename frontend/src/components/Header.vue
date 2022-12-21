@@ -2,6 +2,9 @@
     <!-- Desktop header -->
     <v-container fluid>
         
+        <v-row justify="center" class="header-upper-row">
+        </v-row>
+
         <v-row class="header-row">
             <v-col cols="3" offset="1">
                 <a  class="site-anchor"
@@ -40,21 +43,23 @@
     @import "@/styles/main.css";
 
     .header-bottom-row {
-        background-color: #486293;
-        height: 10px;
+        background-color: #007baa;
+        height: 5px;
+        margin-top: 5px;
     }
 
     .header-upper-row {
-        background-color: #eeeeee;
+        background-color: #003576;
+        height: 30px;
     }
 
     .header-row {
         margin-top: 1px;
-        background-color: #003576;
+        background-color: white;
     }
 
     .header-title {
-        color: white;
+        color: #003576;
         text-align: right;
     }
 

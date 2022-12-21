@@ -6,8 +6,9 @@
                    v-if="!isLargeScreen" >
 
             <!-- Mobile + small desktop -->
-            <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-            <v-toolbar-title><h3>LADISPE</h3></v-toolbar-title>
+            <v-app-bar-nav-icon @click.stop="drawer = !drawer" class="nav-icon"/>
+            <v-toolbar-title><h3 class="mobile-header-title">LADISPE</h3></v-toolbar-title>
+            <v-img alt="POLITO LOGO" :src="logo" class="mobile-logo"/>
         </v-app-bar>
 
         <!-- Navigation drawer -->
@@ -15,7 +16,7 @@
             <v-list nav density="compact">
                 <v-list-item    v-for="item in menu" 
                                 :key="item.text" @click="mobileMenuClickEvent(item)" 
-                                :prepend-icon="item.icon" :to="item.to">
+                                :prepend-icon="item.icon" :to="item.to" color="#007baa">
                     <v-list-item-title v-if="userLang === 'it'">
                         {{ item.textIT }}
                     </v-list-item-title>
@@ -63,7 +64,7 @@
 <script>
     import Header from '@/components/Header.vue';
     import Menu from '@/components/Menu.vue';
-    import logo from '@/assets/logo.png';
+    import logo from '@/assets/logo_poli.svg';
     import { computed } from "vue";
     import { useDisplay } from "vuetify";
 
@@ -239,11 +240,24 @@
     }
 
     .my-appbar {
-        background-color: #eeeeee;
+        background-color: white;
     }
 
-    .spacer {
-        height: 20px;
+    .mobile-header-title {
+        text-align: left;
+        color: #003576;
+    }
+
+    .mobile-logo {
+        height: 85%;
+    }
+
+    .nav-icon {
+        background-color: #007baa;
+        border-radius: 7%;
+        color: white;
+        width: 64px;
+        height: 40px;
     }
 
 </style>

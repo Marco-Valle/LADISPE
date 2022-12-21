@@ -253,6 +253,7 @@
     @import "@/styles/main.css";
 
     .icon-div {
+        color: #003576;
         display: inline-block;
         float: none;
         padding-left: 2px;

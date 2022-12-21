@@ -1,7 +1,7 @@
 <template>
 
     <div class="tooltip">  
-        <v-icon size="x-large" @click="clickEventHandler()">
+        <v-icon size="x-large" @click="clickEventHandler()" class="tooltip-icon">
             {{ icon }}
         </v-icon>
         <span   v-if="userLang === 'it' && !isTouchDevice() && tooltipEnabled"
