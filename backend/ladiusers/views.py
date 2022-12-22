@@ -1,12 +1,15 @@
 from django.core.exceptions import SuspiciousOperation, ObjectDoesNotExist
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
+from typing import Dict
 
 from ladiusers.models import LADIUser
 from ladicontent.models import LADIStaff
 from ladicourses.models import LADICourse
 
 
-def get_user(request):
+def get_user(request: HttpRequest) -> JsonResponse:
+    """ Get a LADIUSer serialized as json from a HTTP request """
+    
     # Only user searches by ID are allowed
     parameters = get_request(request)
     if 'id' not in parameters:
@@ -46,14 +49,16 @@ def get_user(request):
     return JsonResponse([], safe=False)
 
 
-def get_request(request):
+def get_request(request: HttpRequest) -> Dict[str, str]:
+    """ Check for GET request and parse the parameters into a dict """
     if request.method != 'GET':
         raise SuspiciousOperation("GET requests only")
     # Get the parameters from the request
-    return dict(request.GET)
+    return request.GET.dict()
 
 
-def search_by_id(my_id):
+def search_by_id(my_id: int) -> LADIUser:
+    """ Get a LADIUser from its id """
     try:
         return LADIUser.objects.get(id=my_id)
     except ObjectDoesNotExist:

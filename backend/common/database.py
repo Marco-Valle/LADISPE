@@ -1,171 +1,305 @@
+from __future__ import annotations
 from django.http import JsonResponse
 from django.core.exceptions import SuspiciousOperation, ObjectDoesNotExist, FieldError
 from django.forms.models import model_to_dict
+from django.db.models.query import QuerySet
+from django.db.models import Model
+from django.http import HttpRequest
 from filebrowser.base import FileObject
+from typing import Dict, Callable, List, Set, Any, Union, Optional
+from enum import Enum, auto
+from dataclasses import field, dataclass
 
 
-class Database:
+class QueryType(Enum):
+    ALL = auto()
+    BY_ID = auto()
+    BY_KEYWORD = auto()
+    COUNT_ALL = auto()
+    COUNT_BY_KEYWORD = auto()
+    INVALID = auto()
+    
+    
+class QueryAttribute(Enum):
+    LIGHT = auto()
+    PUBLIC = auto()
 
-    def __init__(self, database_search_rules):
-        self.database_search_rules = database_search_rules
 
-    def retrieve_results(self, model, parameters):
+class SortType(Enum):
+    ASCENDING = auto()
+    DESCENDING = auto()
 
-        if parameters['keyword'] == '*' and not parameters['attributes']:
-            return model.objects.all()
 
-        if model in self.database_search_rules:
-            query_set = self.database_search_rules[model](parameters)
+@dataclass
+class _WebQueryOptions:
+    """ WebQuery class options """
+    
+    limit               :   int                                         =   100
+    obj_id              :   int                                         =   -1
+    offset              :   int                                         =   0
+    privileged          :   bool                                        =   False
+    keyword             :   str                                         =   ''
+    order_by            :   str                                         =   'timestamp'
+    sort                :   SortType                                    =   SortType.ASCENDING
+    attributes          :   Set[Union[QueryAttribute, Any]]             =   field(default_factory=set)
+    
+
+class WebQuery:
+    """ WebQuery class can be use to query the dbms from an HTTP request and return a json or a db obj """
+    
+    
+    model               :   Model
+    options             :   _WebQueryOptions  
+    type                :   QueryType                                   =   QueryType.INVALID                        
+    model_search_func   :   Optional[Callable[[WebQuery], QuerySet]]    =   None
+    
+    
+    def __init__(self,
+                 request            :   HttpRequest,
+                 model              :   Model,
+                 count              :   bool                                        =   False,
+                 model_attributes   :   Dict[str, Any]                              =   {},
+                 model_search_func  :   Optional[Callable[[WebQuery], QuerySet]]    =   None,
+                 custom_defaults    :   Optional[Dict[str, Union[int, str, bool]]]  =   None
+                 ) -> None:
+        """ Initializer of the WebQuery class """
+        
+        # Set attributes without default value
+        self.options = _WebQueryOptions()
+        self.model = model
+        if not model:
+            self.type = QueryType.INVALID
+            return
+        
+        if model_search_func:
+            self.model_search_func = model_search_func
+        
+        req_params = WebQuery._parse_GET(request=request)
+        if request.user.is_superuser:
+            self.options.privileged = True
+        
+        # Set custom default values
+        defaults_allowed_types = {int, str, bool}
+        if not custom_defaults:
+            custom_defaults = {}
+        for key, value in custom_defaults.items():
+            if key == 'privileged':
+                continue
+            if key in self.options.__annotations__ and self.options.__annotations__[key] in defaults_allowed_types:
+                setattr(self.options, key, self.options.__annotations__[key](value))
+        
+        # Set query type
+        if req_params.get('id'):
+            self.type = QueryType.BY_ID
+        elif not req_params.get('keyword') or req_params.get('keyword') == '*':
+            self.type = QueryType.ALL if not count else QueryType.COUNT_ALL
         else:
-            query_set = model.objects.none()
-
-        return query_set
-
-    def database_search(self, request, model,
-                        default_offset=0,
-                        default_limit=100,
-                        default_keyword='*',
-                        default_order='timestamp',
-                        default_sort='asc',
-                        default_attributes=None
-                        ):
-
-        if default_attributes is None:
-            # Attributes are boolean flags
-            default_attributes = []
-
-        parameters = Database.get_request(request)
-        Database.set_parameter(parameters, 'attributes', default_attributes)
-
-        if 'id' in parameters:
-            try:
-                # Superuser can see also not public content
-                public_required = ('public' in parameters['attributes']) or not request.user.is_superuser
-                return Database.search_by_id(model, int(parameters['id'][0]), public_flag_required=public_required)
-            except ValueError:
-                return JsonResponse([], safe=False)
-
-        Database.set_parameter(parameters, 'offset', default_offset)
-        Database.set_parameter(parameters, 'limit', default_limit)
-        Database.set_parameter(parameters, 'keyword', default_keyword)
-        Database.set_parameter(parameters, 'order', default_order)
-        Database.set_parameter(parameters, 'sort', default_sort)
-
-        # WHERE clause
-        query_set = self.retrieve_results(model, parameters)
+            self.type = QueryType.BY_KEYWORD if not count else QueryType.COUNT_BY_KEYWORD
+        
+        # Set attributes and parameters
+        if req_params.get('attributes'):
+            self._set_attributes(attributes_str=req_params.get('attributes'), model_attributes=model_attributes)
+        self._set_parameters(req_params) 
+    
+    
+    @property
+    def attributes(self) -> Set[Union[QueryAttribute, Any]]:
+        return self.options.attributes if self.type != QueryType.INVALID else {}
+    
+    
+    @property
+    def keyword(self) -> str:
+        query_by_keyword_types = {QueryType.COUNT_BY_KEYWORD, QueryType.BY_KEYWORD}
+        return self.options.keyword if self.type in query_by_keyword_types else ''
+  
+      
+    @property 
+    def light(self) -> bool:
+        return QueryAttribute.LIGHT in self.options.attributes
+    
+    
+    @property
+    def obj_id(self) -> int:
+        return self.options.obj_id if self.type == QueryType.BY_ID else -1
+    
+        
+    @property 
+    def public(self) -> bool:
+        return QueryAttribute.PUBLIC in self.options.attributes
+        
+        
+    def query(self) -> JsonResponse:
+        """ Query the dbms and return a json """
+        
+        if self.type == QueryType.INVALID:
+            return JsonResponse([], safe=False)
+        elif self.type == QueryType.BY_ID:
+            obj = self.get_object_from_id()
+            return self._json_from_object(obj=obj)
+        
+        query_set = self._get_queryset()
+        if self.type in {QueryType.COUNT_ALL, QueryType.COUNT_BY_KEYWORD}:
+            return JsonResponse(data=query_set.count, safe=False)
+        
+        return self._json_from_queryset(query_set=query_set)
+    
+    
+    def get_object_from_id(self, enforce_public: bool = True) -> Any:
+        """ Get a db object from its id """
+        
+        if self.type != QueryType.BY_ID:
+            return None
+        
+        try:
+            obj = self.model.objects.get(id=self.obj_id)
+        except ObjectDoesNotExist:
+            return None
+        except ValueError:
+            raise SuspiciousOperation("Wrong type")
+        
+        try:
+            if enforce_public and self.public and not obj.public:
+                return None
+        except AttributeError:
+            # No public flag
+            pass
+        
+        return obj
+    
+    
+    def _get_queryset(self) -> QuerySet:
+        """ Get a QuerySet  """
+        
+        if self.type not in {QueryType.ALL, QueryType.BY_KEYWORD}:
+            return self.model.objects.none()
+        
+        if self.type == QueryType.ALL and not self.public:
+            query_set = self.model.objects.all()
+        elif self.model_search_func:
+            query_set = self.model_search_func(self)
+        else:
+            return self.model.objects.none()
+            
+        if not query_set.count:
+            return self.model.objects.none()
+        
         # ORDERED BY
         try:
-            query_set = query_set.order_by(parameters['order'])
-            if parameters['sort'] == 'desc':
+            query_set = query_set.order_by(self.options.order_by)
+            if self.options.sort == SortType.DESCENDING:
                 query_set = query_set.reverse()
         except FieldError:
             # No ordering possible
             pass
-        # SELECT fix number of elements
-        data = list(query_set.values()[parameters['offset']:(parameters['offset'] + parameters['limit'])])
-
-        if 'light' in parameters['attributes']:
-            # Check if a light loading is required
-            if not data:
-                return JsonResponse([], safe=False)
-            big_field = ['html', 'text', 'description']
-            big_existent_field = []
-            for field in big_field:
-                if field in data[0]:
-                    big_existent_field.append(field)
-            for idx, result in enumerate(data):
-                for field in big_existent_field:
-                    try:
-                        del (data[idx][field])
-                    except KeyError:
-                        pass
-        try:
-            return JsonResponse(data, safe=False)
+        
+        return query_set
+    
+        
+    def _set_attributes(self, attributes_str: str, model_attributes: Dict[str, Any]) -> None:
+        """ Used by __init__ to import the attributes """
+        
+        attributes = [str(param).strip() for param in attributes_str.split(',')]
+        if 'light' in attributes:
+            self.options.attributes.add(QueryAttribute.LIGHT)
+        if 'public' in attributes or not self.options.privileged:
+            self.options.attributes.add(QueryAttribute.PUBLIC)
+        
+        for key, value in model_attributes.items():
+            if key in attributes:
+                self.options.attributes.add(value)
+            
+            
+    def _set_parameters(self, req_params: Dict[str, str]) -> None:
+        """ Set the query options from the request parameters """
+        try:       
+            
+            if self.type == QueryType.BY_ID:
+                self.options.obj_id = int(req_params.get('id'))
+            elif self.type == QueryType.BY_KEYWORD:
+                self.options.keyword = req_params['keyword']
+                
+            if req_params.get('limit'):
+                self.options.limit = int(req_params.get('limit'))
+                
+            if req_params.get('offset'):
+                self.options.offset = int(req_params.get('offset'))
+                
+            if req_params.get('sort') == 'desc':
+                self.options.sort = SortType.DESCENDING 
+                
+            if req_params.get('order'):
+                self.options.order_by = req_params['order']
+                
+        except KeyError:
+            self.type = QueryType.INVALID
+            return 
+        
         except TypeError:
-            for idx, result in enumerate(data):
-                for key, value in result.items():
+            self.type = QueryType.INVALID
+            return 
+                
+        except ValueError:
+            self.type = QueryType.INVALID
+            return
+        
+        
+    def _json_from_queryset(self, query_set: QuerySet) -> JsonResponse:
+        """ Get a json from a QuerySet """
+        
+        if not query_set.count:
+            return JsonResponse(data=[], safe=False)
+        
+        # SELECT fix number of elements
+        data = list(query_set.values()[self.options.offset:(self.options.offset + self.options.limit)])
+        
+        if self.light:
+            WebQuery._lighten_data_list(data_list=data)
+        
+        try:
+            return JsonResponse(data=data, safe=False)
+        except TypeError:
+            for idx, obj in enumerate(data):
+                for key, value in obj.items():
                     # Check for not serializable objects and replace them with their string versions
                     if type(value) == FileObject:
                         data[idx][key] = value.path
                     elif type(value) != str and type(value) != int:
-                        data[idx][key] = str(result[key])
-            return JsonResponse(data, safe=False)
-
-    def database_rows_count(self, request, model, default_attributes=None):
-        if request.method != 'GET':
-            raise SuspiciousOperation("GET requests only")
-        if default_attributes is None:
-            default_attributes = []
-        # Get the parameters from the request
-        parameters = dict(request.GET)
-        Database.set_parameter(parameters, 'keyword', '*')
-        Database.set_parameter(parameters, 'attributes', default_attributes)
-        # WHERE clause
-        query_set = self.retrieve_results(model, parameters)
-        return JsonResponse(query_set.count(), safe=False)
-
-    @staticmethod
-    def search_by_id(model, my_id, public_flag_required=False):
+                        data[idx][key] = str(obj.get(key))
+            return JsonResponse(data=data, safe=False)
+        
+        
+    def _json_from_object(self, obj: Any) -> JsonResponse:
+        """ Get a json from a db object """
+        
+        if self.type != QueryType.BY_ID or not obj:
+            return JsonResponse(data=[], safe=False)
+        
         try:
-            result = model.objects.get(id=my_id)
-        except ObjectDoesNotExist:
-            return JsonResponse([], safe=False)
-        except ValueError:
-            raise SuspiciousOperation("Wrong type")
-        try:
-            if public_flag_required and not result.public:
-                return JsonResponse([], safe=False)
-        except AttributeError:
-            # No public flag
-            pass
-        try:
-            return JsonResponse(model_to_dict(result), safe=True)
+            return JsonResponse(data=model_to_dict(obj), safe=True)
         except TypeError:
-            result = model_to_dict(result)
-            for key, value in result.items():
+            obj = model_to_dict(obj)
+            for key, value in obj.items():
                 # Check for not serializable objects and replace them with their string versions
                 if type(value) != str and type(value) != int:
-                    result[key] = str(result[key])
-            return JsonResponse(result, safe=False)
+                    obj[key] = str(obj[key])
+            return JsonResponse(data=obj, safe=True)
 
+     
     @staticmethod
-    def get_parent(request, parent_model):
-        parameters = Database.get_request(request)
-        try:
-            parent = parent_model.objects.get(id=int(parameters['id'][0]))
-        except ObjectDoesNotExist:
-            return None
-        except ValueError:
-            raise SuspiciousOperation("Wrong GET parameter")
-        except KeyError:
-            raise SuspiciousOperation("Wrong GET parameter")
-        return parent
-
+    def _lighten_data_list(data_list: List[Dict[str, Any]]) -> List[str, Any]:
+        """ Remove some large fields from a dict containing the db objects attributes """
+        for idx, item in enumerate(data_list):
+            big_fields = {'html', 'text', 'description'}.intersection(item.keys())
+            for key in big_fields:
+                del(data_list[idx][key])
+        
+        
     @staticmethod
-    def check_parent_id(request, parent_model):
-        parent = Database.get_parent(request, parent_model)
-        if not parent:
-            return None
-        return parent.id
-
-    @staticmethod
-    def get_request(request):
+    def _parse_GET(request: HttpRequest) -> Dict[str, str]:
+        """ Check that the GET request and return a dict"""
+        
         if request.method != 'GET':
             raise SuspiciousOperation("GET requests only")
-        # Get the parameters from the request
-        return dict(request.GET)
-
-    @staticmethod
-    def set_parameter(parameters, name, default_value):
-        if name in parameters:
-            try:
-                if name == 'attributes':
-                    # Attributes are boolean flags
-                    # get a list from a URL
-                    parameters[name] = [str(param) for param in parameters[name][0].split(',')]
-                else:
-                    parameters[name] = type(default_value)(parameters[name][0])
-                return
-            except TypeError:
-                pass
-        parameters[name] = default_value
+        
+        return request.GET.dict()
+                

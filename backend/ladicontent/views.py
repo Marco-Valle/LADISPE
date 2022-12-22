@@ -1,38 +1,53 @@
-from common.database import Database
 from django.http import JsonResponse
+from django.http import HttpRequest
+from django.db.models.query import QuerySet
 
+from common.database import *
 from ladicontent.models import LADIForm, LADINews, LADIPicture, LADIStory, LADIGallery, LADIStaff
 
-database_search_rules = {
-    LADINews: lambda params: news_retrieve_results(params),
-    LADIPicture: lambda params: pictures_retrieve_results(params),
-    LADIStory: lambda params: stories_retrieve_results(params),
-    LADIGallery: lambda params: galleries_retrieve_results(params),
-    LADIStaff: lambda params: staffs_retrieve_results(params),
-    LADIForm: lambda params: forms_retrieve_results(params),
-}
 
-db = Database(database_search_rules)
-mandatory_attributes = lambda request: [] if request.user.is_superuser else ['public']  
+# Custom models attributes
+
+class NewsAttribute(Enum):
+    LADINEWS_IN_EVIDENCE = auto()
+
+
+class StoryAttribute(Enum):
+    LADISTORY_MATERIAL = auto()
+    LADISTORY_STORY = auto()
 
 
 # LADINews
 
-def get_news(request):
-    return db.database_search(request, LADINews)
+def get_news(request: HttpRequest) -> JsonResponse:
+    """ Get LADINews """
+    query = WebQuery(request=request,
+                     model=LADINews,
+                     count=False,
+                     model_search_func=news_retrieve_results,
+                     model_attributes={'in_evidence': NewsAttribute.LADINEWS_IN_EVIDENCE}
+                     )
+    return query.query()
 
 
-def get_news_count(request):
-    return db.database_rows_count(request, LADINews)
+def get_news_count(request: HttpRequest) -> JsonResponse:
+    """ Get LADINews rows count """
+    query = WebQuery(request=request,
+                     model=LADINews,
+                     count=True,
+                     model_search_func=news_retrieve_results,
+                     model_attributes={'in_evidence': NewsAttribute.LADINEWS_IN_EVIDENCE}
+                     )
+    return query.query()
 
 
-def news_retrieve_results(parameters):
-    if parameters['keyword'] == '*':
+def news_retrieve_results(query: WebQuery) -> QuerySet:
+    if query.type == QueryType.ALL:
         query_set = LADINews.objects.all()
     else:
-        query_set = LADINews.objects.filter(title__contains=parameters['keyword'])
-        query_set = LADINews.objects.filter(text__contains=parameters['keyword']).union(query_set)
-    if 'in_evidence' in parameters['attributes']:
+        query_set = LADINews.objects.filter(title__contains=query.keyword)
+        query_set = LADINews.objects.filter(text__contains=query.keyword).union(query_set)
+    if NewsAttribute.LADINEWS_IN_EVIDENCE in query.attributes:
         # Select the LADINews which are in evidence
         query_set = LADINews.objects.filter(in_evidence=True).intersection(query_set)
     return query_set
@@ -40,100 +55,178 @@ def news_retrieve_results(parameters):
 
 # LADIPicture
 
-def get_pictures(request):
-    return db.database_search(request, LADIPicture, default_limit=10)
+def get_pictures(request: HttpRequest) -> JsonResponse:
+    """ Get LADIPicture """
+    query = WebQuery(request=request,
+                     model=LADIPicture,
+                     custom_defaults={'limit': 10},
+                     count=False,
+                     model_search_func=pictures_retrieve_results
+                     )
+    return query.query()
 
 
-def get_pictures_count(request):
-    return db.database_rows_count(request, LADIPicture)
+def get_pictures_count(request: HttpRequest) -> JsonResponse:
+    """ Get LADIPicture rows count """
+    query = WebQuery(request=request,
+                     model=LADIPicture,
+                     count=True,
+                     model_search_func=pictures_retrieve_results
+                     )
+    return query.query()
 
 
-def pictures_retrieve_results(parameters):
-    query_set = LADIPicture.objects.filter(gallery__description__contains=parameters['keyword'])
-    query_set = LADIPicture.objects.filter(gallery__title__startswith=parameters['keyword']).union(query_set)
-    query_set = LADIPicture.objects.filter(description__contains=parameters['keyword']).union(query_set)
+def pictures_retrieve_results(query: WebQuery) -> QuerySet:
+    query_set = LADIPicture.objects.filter(gallery__description__contains=query.keyword)
+    query_set = LADIPicture.objects.filter(gallery__title__startswith=query.keyword).union(query_set)
+    query_set = LADIPicture.objects.filter(description__contains=query.keyword).union(query_set)
     return query_set
 
 
 # LADIStory
 
-def get_stories(request):
-    return db.database_search(request, LADIStory)
+def get_stories(request: HttpRequest) -> JsonResponse:
+    """ Get LADIStory """
+    query = WebQuery(request=request,
+                     model=LADIStory,
+                     count=False,
+                     model_attributes={
+                         'story_type'   :   StoryAttribute.LADISTORY_STORY,
+                         'material_type':   StoryAttribute.LADISTORY_MATERIAL
+                         },
+                     model_search_func=stories_retrieve_results
+                     )
+    return query.query()
 
 
-def get_stories_count(request):
-    return db.database_rows_count(request, LADIStory)
+def get_stories_count(request: HttpRequest) -> JsonResponse:
+    """ Get LADIStory rows count """
+    query = WebQuery(request=request,
+                     model=LADIStory,
+                     count=True,
+                     model_attributes={
+                         'story_type'   :   StoryAttribute.LADISTORY_STORY,
+                         'material_type':   StoryAttribute.LADISTORY_MATERIAL
+                         },
+                     model_search_func=stories_retrieve_results
+                     )
+    return query.query()
 
 
-def stories_retrieve_results(parameters):
-    if parameters['keyword'] == '*':
+def stories_retrieve_results(query: WebQuery) -> QuerySet:
+    if query.type == QueryType.ALL:
         query_set = LADIStory.objects.all()
     else:
-        query_set = LADIStory.objects.filter(title__startswith=parameters['keyword'])
-        query_set = LADIStory.objects.filter(html__contains=parameters['keyword']).union(query_set)
-        query_set = LADIStory.objects.filter(preview__contains=parameters['keyword']).union(query_set)
-        query_set = LADIStory.objects.filter(author__contains=parameters['keyword']).union(query_set)
-    if 'story_type' in parameters['attributes']:
+        query_set = LADIStory.objects.filter(title__startswith=query.keyword)
+        query_set = LADIStory.objects.filter(html__contains=query.keyword).union(query_set)
+        query_set = LADIStory.objects.filter(preview__contains=query.keyword).union(query_set)
+        query_set = LADIStory.objects.filter(author__contains=query.keyword).union(query_set)
+    if StoryAttribute.LADISTORY_STORY in query.attributes:
         query_set = LADIStory.objects.filter(type__exact=1).intersection(query_set)
-    elif 'material_type' in parameters['attributes']:
+    elif StoryAttribute.LADISTORY_MATERIAL in query.attributes:
         query_set = LADIStory.objects.filter(type__exact=2).intersection(query_set)
     return query_set
 
 
 # LADIGallery
 
-def get_galleries(request):
-    return db.database_search(request, LADIGallery)
+def get_galleries(request: HttpRequest) -> JsonResponse:
+    """ Get LADIGallery """
+    query = WebQuery(request=request,
+                     model=LADIGallery,
+                     count=False,
+                     model_search_func=galleries_retrieve_results
+                     )
+    return query.query()
 
 
-def get_galleries_count(request):
-    return db.database_rows_count(request, LADIGallery)
+def get_galleries_count(request: HttpRequest) -> JsonResponse:
+    """ Get LADIGallery rows count """
+    query = WebQuery(request=request,
+                     model=LADIGallery,
+                     count=True,
+                     model_search_func=galleries_retrieve_results
+                     )
+    return query.query()
 
 
-def get_gallery_pictures(request):
-    gallery_id = db.check_parent_id(request, LADIGallery)
-    if not gallery_id:
+def get_gallery_pictures(request: HttpRequest) -> JsonResponse:
+    query = WebQuery(request=request,
+                     model=LADIGallery,
+                     count=False,
+                     model_search_func=None
+                     )
+    gallery = query.get_object_from_id()
+    if not gallery:
         return JsonResponse([], safe=False)
-    query_set = LADIPicture.objects.filter(gallery=gallery_id)
-    return JsonResponse(list(query_set.values()), safe=False)
+    try:
+        query_set = LADIPicture.objects.filter(gallery=gallery.id)
+        return JsonResponse(list(query_set.values()), safe=False)
+    except AttributeError:
+        return JsonResponse([], safe=False)
+    
 
 
-def galleries_retrieve_results(parameters):
-    query_set = LADIGallery.objects.filter(description__contains=parameters['keyword'])
-    query_set = LADIGallery.objects.filter(title__startswith=parameters['keyword']).union(query_set)
+def galleries_retrieve_results(query: WebQuery) -> QuerySet:
+    query_set = LADIGallery.objects.filter(description__contains=query.keyword)
+    query_set = LADIGallery.objects.filter(title__startswith=query.keyword).union(query_set)
     return query_set
 
 
 # LADIStaff
 
-def get_staffs(request):
-    return db.database_search(request, LADIStaff)
+def get_staffs(request: HttpRequest) -> JsonResponse:
+    """ Get LADIStaff """
+    query = WebQuery(request=request,
+                     model=LADIStaff,
+                     count=False,
+                     model_search_func=staffs_retrieve_results
+                     )
+    return query.query()
 
 
-def get_staffs_count(request):
-    return db.database_rows_count(request, LADIStaff)
+def get_staffs_count(request: HttpRequest) -> JsonResponse:
+    """ Get LADIStaff rows count """
+    query = WebQuery(request=request,
+                     model=LADIStaff,
+                     count=True,
+                     model_search_func=staffs_retrieve_results
+                     )
+    return query.query()
 
 
-def staffs_retrieve_results(parameters):
-    query_set = LADIStaff.objects.filter(position__contains=parameters['keyword'])
+def staffs_retrieve_results(query: WebQuery) -> QuerySet:
+    query_set = LADIStaff.objects.filter(position__contains=query.keyword)
     return query_set
 
 
 # LADIForms
 
-def get_forms(request):
-    return db.database_search(request, LADIForm, default_attributes=mandatory_attributes(request))
+def get_forms(request: HttpRequest) -> JsonResponse:
+    """ Get LADIForm """
+    query = WebQuery(request=request,
+                     model=LADIForm,
+                     count=False,
+                     model_search_func=staffs_retrieve_results
+                     )
+    return query.query()
 
 
-def get_forms_count(request):
-    return db.database_rows_count(request, LADIForm, default_attributes=mandatory_attributes(request))
+def get_forms_count(request: HttpRequest) -> JsonResponse:
+    """ Get LADIForm rows count """
+    query = WebQuery(request=request,
+                     model=LADIForm,
+                     count=True,
+                     model_search_func=staffs_retrieve_results
+                     )
+    return query.query()
 
 
-def forms_retrieve_results(parameters):
-    if parameters['keyword'] == '*':
+def forms_retrieve_results(query: WebQuery) -> QuerySet:
+    if query.type == QueryType.ALL:
         query_set = LADIForm.objects.all()
     else:
-        query_set = LADIForm.objects.filter(title__contains=parameters['keyword'])
-    if 'public' in parameters['attributes']:
+        query_set = LADIForm.objects.filter(title__contains=query.keyword)
+    if query.public:
         return query_set.filter(public__exact=True)
     return query_set

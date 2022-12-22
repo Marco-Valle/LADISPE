@@ -1,37 +1,44 @@
-from common.database import Database
-from django.http import JsonResponse
-from django.core.exceptions import SuspiciousOperation
+from common.database import *
+from django.http import JsonResponse, HttpRequest
 from django.core.exceptions import ObjectDoesNotExist
 from backend.settings import MEDIA_ROOT, MEDIA_URL, FILEBROWSER_DIRECTORY, MAX_DEPTH_IN_MATERIAL_SEARCH
 from os import path, walk
 from urllib.parse import quote
 from time import strftime, localtime
 from filebrowser.base import FileObject
+from typing import List, Dict, Union
 
 from ladicourses.models import LADICourse, LADILecture
 
-database_search_rules = {
-    LADICourse: lambda params: courses_retrieve_results(params),
-    LADILecture: lambda params: lectures_retrieve_results(params),
-}
-
-db = Database(database_search_rules)
-mandatory_attributes = lambda request: [] if request.user.is_superuser else ['public']  
+ 
 material_empty_response = JsonResponse([{'title': '', 'breadcrumbs': [], 'files': []}], safe=False)
 
 
 # LADICourse
 
-def get_courses(request):
-    return db.database_search(request, LADICourse, default_attributes=mandatory_attributes(request))
+def get_courses(request: HttpRequest) -> JsonResponse:
+    """ Get LADICourse """
+    query = WebQuery(request=request,
+                     model=LADICourse,
+                     count=False,
+                     model_search_func=courses_retrieve_results
+                     )
+    return query.query()
 
 
-def get_courses_count(request):
-    return db.database_rows_count(request, LADICourse, default_attributes=mandatory_attributes(request))
+def get_courses_count(request: HttpRequest) -> JsonResponse:
+    """ Get LADICourse rows count """
+    query = WebQuery(request=request,
+                     model=LADICourse,
+                     count=True,
+                     model_search_func=courses_retrieve_results
+                     )
+    return query.query()
 
 
-def get_courses_lectures(request):
-    course = db.get_parent(request, LADICourse)
+def get_courses_lectures(request: HttpRequest) -> JsonResponse:
+    query = WebQuery(request=request, model=LADICourse, count=False)
+    course = query.get_object_from_id(enforce_public=False)
     if not course:
         return JsonResponse([], safe=False)
     if not course.public and not request.user.is_superuser:
@@ -50,16 +57,10 @@ def get_courses_lectures(request):
     return JsonResponse(data, safe=False)
 
 
-def get_courses_materials(request):
-    params = Database.get_request(request)
-    try:
-        if 'id' not in params or (not LADICourse.objects.get(id=params['id'][0]).public and not request.user.is_superuser):
-            return material_empty_response
-    except ObjectDoesNotExist:
-        return material_empty_response
-    except ValueError:
-        raise SuspiciousOperation("Wrong GET parameter")
-    materials_path = courses_get_folder(params['id'][0])
+def get_courses_materials(request: HttpRequest) -> JsonResponse:
+    query = WebQuery(request=request, model=LADICourse, count=False)
+    course = query.get_object_from_id()
+    materials_path = courses_get_folder(course.id)
     if not materials_path:
         return material_empty_response
     root_files = next(walk(materials_path), (None, None, []))[2]    # Add root directory
@@ -70,7 +71,11 @@ def get_courses_materials(request):
     return JsonResponse(result, safe=False)
 
 
-def courses_recursive_browse(dirs_list, parent, depth, breadcrumbs):
+def courses_recursive_browse(dirs_list: List[Dict[str, Union[str, List[str], List[Dict[str, str]]]]],
+                             parent: str,
+                             depth: int,
+                             breadcrumbs: List[str]
+                             ) -> List[Dict[str, str]]:
     parent_dir = next(walk(parent), (None, None, []))
     if depth:
         for topic_title in parent_dir[1]:
@@ -84,20 +89,20 @@ def courses_recursive_browse(dirs_list, parent, depth, breadcrumbs):
     return [courses_pack_file(file, parent) for file in parent_dir[2]]
 
 
-def courses_retrieve_results(parameters):
-    if parameters['keyword'] == '*':
+def courses_retrieve_results(query: WebQuery) -> QuerySet:
+    if query.type == QueryType.ALL:
         query_set = LADICourse.objects.all()
     else:
-        query_set = LADICourse.objects.filter(course_code__exact=parameters['keyword'])
+        query_set = LADICourse.objects.filter(course_code__exact=query.keyword)
         if not query_set:
-            query_set = LADICourse.objects.filter(title__contains=parameters['keyword'])
-            query_set = LADICourse.objects.filter(degree_course__contains=parameters['keyword']).union(query_set)
-    if 'public' in parameters['attributes']:
+            query_set = LADICourse.objects.filter(title__contains=query.keyword)
+            query_set = LADICourse.objects.filter(degree_course__contains=query.keyword).union(query_set)
+    if query.public:
         return query_set.filter(public__exact=True)
     return query_set
 
 
-def courses_get_folder(course_id):
+def courses_get_folder(course_id: int) -> str:
     try:
         course = LADICourse.objects.get(id=course_id)
     except ObjectDoesNotExist:
@@ -108,23 +113,23 @@ def courses_get_folder(course_id):
     return course_dir
 
 
-def courses_get_file_url(parent_path, file_name):
+def courses_get_file_url(parent_path: str, file_name: str) -> str:
     parent = parent_path[parent_path.find(FILEBROWSER_DIRECTORY) + len(FILEBROWSER_DIRECTORY):]
     url = str(quote("{}{}{}/{}".format(MEDIA_URL, FILEBROWSER_DIRECTORY, parent, file_name).replace('\\', '/')))
     return url.replace('%2F', '/', 1)
 
 
-def courses_get_file_date(parent, filename):
+def courses_get_file_date(parent: str, filename: str) -> str:
     epoch = path.getmtime(path.join(parent, filename))
     return strftime('%d-%m-%Y', localtime(epoch))
 
 
-def courses_get_file_size(parent, filename):
+def courses_get_file_size(parent: str, filename: str) -> str:
     size = path.getsize(path.join(parent, filename))
     return "{:.3f}".format(size * 9.54e-7)
 
 
-def courses_pack_file(file, parent):
+def courses_pack_file(file: str, parent: str) -> List[Dict[str, str]]:
     return {
         'name': file,
         'url': courses_get_file_url(parent, file),
@@ -132,26 +137,39 @@ def courses_pack_file(file, parent):
         'size': courses_get_file_size(parent, file)}
 
 
-def courses_sort_material(materials):
+def courses_sort_material(materials: List[Dict[str, Union[str, List[str], List[Dict[str, str]]]]]
+                          ) -> List[Dict[str, Union[str, List[str], List[Dict[str, str]]]]]:
     materials.sort(key=(lambda material: len(material['breadcrumbs'])), reverse=False)
 
 
 # LADILecture
 
-def get_lectures(request):
-    return db.database_search(request, LADILecture, default_attributes=mandatory_attributes(request))
+def get_lectures(request: HttpRequest) -> JsonResponse:
+    """ Get LADICourse """
+    query = WebQuery(request=request,
+                     model=LADILecture,
+                     count=False,
+                     model_search_func=lectures_retrieve_results
+                     )
+    return query.query()
 
 
-def get_lectures_count(request):
-    return db.database_rows_count(request, LADILecture, default_attributes=mandatory_attributes(request))
+def get_lectures_count(request: HttpRequest) -> JsonResponse:
+    """ Get LADICourse rows count """
+    query = WebQuery(request=request,
+                     model=LADILecture,
+                     count=True,
+                     model_search_func=lectures_retrieve_results
+                     )
+    return query.query()
 
 
-def lectures_retrieve_results(parameters):
-    if parameters['keyword'] == '*':
+def lectures_retrieve_results(query: WebQuery) -> QuerySet:
+    if query.type == QueryType.ALL:
         query_set = LADILecture.objects.all()
     else:
-        query_set = LADILecture.objects.filter(title__contains=parameters['keyword'])
-        query_set = LADILecture.objects.filter(text__contains=parameters['keyword']).union(query_set)
-    if 'public' in parameters['attributes']:
+        query_set = LADILecture.objects.filter(title__contains=query.keyword)
+        query_set = LADILecture.objects.filter(text__contains=query.keyword).union(query_set)
+    if query.public:
         return query_set.filter(course__public__exact=True)
     return query_set

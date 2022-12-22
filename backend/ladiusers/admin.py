@@ -4,13 +4,17 @@ from django.contrib.auth.models import Group
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import SuspiciousOperation, ObjectDoesNotExist
+from django.http import HttpRequest
+from typing import Any
 
-from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import LADIUser
+from ladiusers.forms import CustomUserCreationForm, CustomUserChangeForm
+from ladiusers.models import LADIUser
 
 
 # Create ModelForm based on the Group model.
 class GroupAdminForm(forms.ModelForm):
+    """ The ModelForm for the the management of groups in the admin page """
+    
     class Meta:
         model = Group
         exclude = []
@@ -23,7 +27,8 @@ class GroupAdminForm(forms.ModelForm):
          widget=FilteredSelectMultiple('users', False)
     )
 
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs) -> None:
         # Do the normal form initialisation.
         super(GroupAdminForm, self).__init__(*args, **kwargs)
         # If it is an existing group (saved objects have a pk).
@@ -31,11 +36,13 @@ class GroupAdminForm(forms.ModelForm):
             # Populate the users field with the current Group users.
             self.fields['users'].initial = self.instance.user_set.all()
 
-    def save_m2m(self):
+
+    def save_m2m(self) -> None:
         # Add the users to the Group.
         self.instance.user_set.set(self.cleaned_data['users'])
 
-    def save(self, *args, **kwargs):
+
+    def save(self, *args, **kwargs) -> Any:
         # Default save
         instance = super(GroupAdminForm, self).save()
         # Save many-to-many data
@@ -43,15 +50,19 @@ class GroupAdminForm(forms.ModelForm):
         return instance
 
 
-# Create a new Group admin.
+
 class GroupAdmin(admin.ModelAdmin):
+    """ The ModelClass for the management of groups in the admin page """
+    
     # Use our custom form.
     form = GroupAdminForm
     # Filter permissions horizontal as well.
     filter_horizontal = ['permissions']
 
 
+
 class CustomUserAdmin(UserAdmin):
+    """ The ModelClass for LADIUser """
 
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
@@ -72,7 +83,10 @@ class CustomUserAdmin(UserAdmin):
     readonly_fields = ('is_professor', 'is_borsista')
     ordering = ('email', 'name', 'surname')
 
-    def save_form(self, request, form, change):
+
+    def save_form(self, request: HttpRequest, form: Any, change: bool) -> LADIUser:
+        """ This function is called when a user tries to save an object in the Django admin portal """
+        
         if not request.user.is_superuser:
             try:
                 post_email = request.POST.get('email', None)
@@ -87,6 +101,7 @@ class CustomUserAdmin(UserAdmin):
                     raise SuspiciousOperation("Only superadmins can add superadmins")
         obj = super().save_form(request, form, change)
         return obj
+
 
 
 admin.site.register(LADIUser, CustomUserAdmin)

@@ -1,16 +1,27 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.http import HttpRequest
+from typing import Optional
+from ladiusers.models import LADIUser
 import logging
 import ldap
+
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 ldap.set_option(ldap.OPT_REFERRALS, 0)
 
-class CustomLDAPBackend(ModelBackend):
 
-    def authenticate(self, request, username=None, password=None, **kwars):
+class CustomLDAPBackend(ModelBackend):
+    """ Custom authentication backend to allow auth with LDAP """
+
+    def authenticate(self,
+                     request: HttpRequest,
+                     username: Optional[str] = None,
+                     password: Optional[str] = None,
+                     **kwars) -> Optional[LADIUser]:
+        """ Implementation of the required Django authenticate() method """
 
         if username is None:
             return None

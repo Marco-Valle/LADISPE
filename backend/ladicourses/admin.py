@@ -1,46 +1,62 @@
 from django.contrib import admin
 import logging
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from django.http import HttpRequest
 from backend.settings import MEDIA_ROOT, FILEBROWSER_DIRECTORY
 from os import path, makedirs, rename
 from ladicourses.models import LADICourse, LADILecture
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class CourseAuthorAdmin(admin.ModelAdmin):
+    """ The ModelClass for LADICourse """
 
-    def save_form(self, request, form, change):
-        if change:
-            course_id = int(request.path[len("/admin/ladicourses/ladicourse/"):request.path.find("/change")])
-            old_title = LADICourse.objects.get(id=course_id).title
-        else:
-            old_title = None
+
+    def save_form(self, request: HttpRequest, form: Any, change: bool) -> LADICourse:
+        """ This function is called when a user tries to save an object in the Django admin portal """
+        
         obj = super().save_form(request, form, change)
-        if change and obj.title != old_title:
-            CourseAuthorAdmin.update_course_directory(obj, old_title=old_title)
-        else:
-            # Select automatically the owner
+        if change:
             try:
-                obj.owner = request.user
-            except AttributeError:
-                pass
-            # Create the dir if it doesn't exist
-            CourseAuthorAdmin.update_course_directory(obj)
+                course_id = int(request.path[len("/admin/ladicourses/ladicourse/"):request.path.find("/change")])
+                old_title = LADICourse.objects.get(id=course_id).title
+            except ValueError:
+                old_title = None
+            if obj.title != old_title:
+                CourseAuthorAdmin.update_course_directory(obj, old_title=old_title)
+                return obj
+            
+        # Select automatically the owner
+        try:
+            obj.owner = request.user
+        except AttributeError:
+            pass
+        # Create the dir if it doesn't exist
+        CourseAuthorAdmin.update_course_directory(obj)
         return obj
 
-    def has_change_permission(self, request, obj=None):
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[LADICourse] = None) -> bool:
+        """ Check if the user is allowed to modify the object in the admin portal """
         return CourseAuthorAdmin.check_ownership(request, obj)
 
-    def has_delete_permission(self, request, obj=None):
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[LADICourse] = None) -> bool:
+        """ Check if the user is allowed to delete the object in the admin portal """
         return CourseAuthorAdmin.check_ownership(request, obj)
 
-    def has_module_permission(self, request):
+
+    def has_module_permission(self, request: HttpRequest) -> bool:
+        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
         return request.user.is_superuser or 'ladicourses.view_ladicourse' in request.user.get_group_permissions()
 
+
     @staticmethod
-    def check_ownership(request, obj, default_no_owner=True):
-        if obj is None or request.user.is_superuser:
+    def check_ownership(request, obj: Optional[LADICourse], default_no_owner: bool = True) -> bool:
+        """ Check if the user has the ownership in a specific object """
+        if not obj or request.user.is_superuser:
             return True
         try:
             owner = obj.professor
@@ -49,8 +65,11 @@ class CourseAuthorAdmin(admin.ModelAdmin):
             return default_no_owner
         return owner == request.user
 
+
     @staticmethod
-    def update_course_directory(obj, old_title=None):
+    def update_course_directory(obj: LADICourse, old_title: Optional[str] = None) -> None:
+        """ Create or rename a directory for the course material """
+        
         course_dir = path.join(MEDIA_ROOT, FILEBROWSER_DIRECTORY, 'Users', str(obj.professor_id), obj.title)
         if not old_title and not path.isdir(course_dir):
             try:
@@ -69,9 +88,14 @@ class CourseAuthorAdmin(admin.ModelAdmin):
                 logger.warning("Can't move the course folder ({} - prof_id: {})".format(obj.title, obj.professor_id))
 
 
-class LectureAuthorAdmin(admin.ModelAdmin):
 
-    def save_form(self, request, form, change):
+class LectureAuthorAdmin(admin.ModelAdmin):
+    """ The ModelClass for LADILecture """
+
+
+    def save_form(self, request: HttpRequest, form: Any, change: bool) -> LADILecture:
+        """ This function is called when a user tries to save an object in the admin portal """
+        
         if not request.user.is_superuser:
             course_id = request.POST.get('course')
             if not course_id:
@@ -82,22 +106,31 @@ class LectureAuthorAdmin(admin.ModelAdmin):
         obj = super().save_form(request, form, change)
         return obj
 
-    def has_change_permission(self, request, obj=None):
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[LADILecture] = None) -> bool:
+        """ Check if the user is allowed to modify the object in the admin portal """
         return LectureAuthorAdmin.check_ownership(request, obj)
 
-    def has_delete_permission(self, request, obj=None):
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[LADILecture] = None) -> bool:
+        """ Check if the user is allowed to delete the object in the admin portal """
         return LectureAuthorAdmin.check_ownership(request, obj)
 
-    def has_module_permission(self, request):
+
+    def has_module_permission(self, request: HttpRequest) -> bool:
+        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
         return request.user.is_superuser or 'ladicourses.view_ladilecture' in request.user.get_group_permissions()
 
+
     @staticmethod
-    def check_ownership(request, obj):
-        if obj is None or request.user.is_superuser:
+    def check_ownership(request, obj: Optional[LADILecture]) -> bool:
+        """ Check if the user has the ownership in a specific object """
+        if not obj or request.user.is_superuser:
             return True
         if obj.course.first_assistant == request.user or obj.course.second_assistant == request.user:
             return True
         return obj.course.professor == request.user
+
 
 
 admin.site.register(LADICourse, CourseAuthorAdmin)

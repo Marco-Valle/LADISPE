@@ -4,10 +4,12 @@ from django.core.validators import RegexValidator
 from filebrowser.fields import FileBrowseField
 from tinymce.models import HTMLField
 
+
 User = settings.AUTH_USER_MODEL
 
 
 class LADICourse(models.Model):
+    """ LADICourse db model """
 
     timestamp = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=True)
@@ -21,11 +23,12 @@ class LADICourse(models.Model):
     first_assistant = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='first_assistant', null=True, blank=True)
     second_assistant = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='second_assistant', null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{} - {}'.format(self.course_code, self.title)
 
 
 class LADILecture(models.Model):
+    """ LADILecture db model """
 
     timestamp = models.DateTimeField(auto_now=True)
     course = models.ForeignKey(LADICourse, on_delete=models.CASCADE)
@@ -34,5 +37,5 @@ class LADILecture(models.Model):
     html = HTMLField(blank=True)
     author = models.CharField(max_length=30, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{} - {}'.format(self.course, self.title)

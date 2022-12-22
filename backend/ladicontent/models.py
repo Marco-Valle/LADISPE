@@ -5,10 +5,12 @@ from tinymce.models import HTMLField
 from filebrowser.fields import FileBrowseField
 from phonenumber_field.modelfields import PhoneNumberField
 
+
 User = settings.AUTH_USER_MODEL
 
 
 class LADINews(models.Model):
+    """ LADINews db model """
 
     timestamp = models.DateTimeField(auto_now=True)
     cover = models.ImageField(upload_to='news/%Y/%m/%d/', default='default.png')
@@ -18,7 +20,7 @@ class LADINews(models.Model):
     text = models.TextField(blank=True, help_text="Use &lt;br&gt; to break the line")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{} - {}'.format(self.title, self.owner)
 
     class Meta:
@@ -26,6 +28,7 @@ class LADINews(models.Model):
 
 
 class LADIGallery(models.Model):
+    """ LADIGallery db model """
 
     title = models.CharField(   max_length=30, 
                                 unique=True, 
@@ -34,14 +37,17 @@ class LADIGallery(models.Model):
     description = models.TextField(blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{} - {}'.format(self.title, self.owner)
 
 
 class LADIPicture(models.Model):
-
-    # Galleries' pictures (not accessible from the file browser)
-    # They can be linked to a news (ex. homepage) or with an external link (not both)
+    """ 
+    LADIPicture db model
+    Galleries' pictures (not accessible from the file browser)
+    They can be linked to a news (ex. homepage) or with an external link (not both)
+    """
+    
     timestamp = models.DateTimeField(auto_now=True)
     picture = models.ImageField(upload_to='gallery/%Y/%m/%d/')
     gallery = models.ForeignKey(LADIGallery, on_delete=models.CASCADE, blank=True, null=True,
@@ -51,7 +57,7 @@ class LADIPicture(models.Model):
     news = models.ForeignKey(LADINews, on_delete=models.SET_NULL, null=True, blank=True,
                              help_text="You can link the picture to a news (link redirection won't work)")
 
-    def __str__(self):
+    def __str__(self) -> str:
         string = 'Picture - {}'.format(self.gallery)
         if self.description != '':
             string += '- {}'.format(self.description)
@@ -59,6 +65,7 @@ class LADIPicture(models.Model):
 
 
 class LADIStory(models.Model):
+    """ LADIStory db model """
 
     STORY_TYPES = (
         (1, 'Story'),
@@ -76,11 +83,12 @@ class LADIStory(models.Model):
     gallery = models.ForeignKey(LADIGallery, on_delete=models.SET_NULL, null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{} - {} - {}'.format(self.type, self.title, self.owner)
 
 
 class LADIStaff(models.Model):
+    """ LADIStaff db model """
 
     cover = models.ImageField(upload_to='staff/%Y/%m/%d/', default='default.png')
     user = models.ForeignKey(User, on_delete=models.CASCADE,
@@ -89,15 +97,16 @@ class LADIStaff(models.Model):
     phone = PhoneNumberField(null=True, blank=True)
     fax = PhoneNumberField(null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}'.format(self.user)
 
 
 class LADIForm(models.Model):
+    """ LADIForm db model """
 
     title = models.CharField(max_length=70, blank=False, unique=True)
     file = models.FileField(upload_to='forms/')
     public = models.BooleanField(default=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}'.format(self.title)
