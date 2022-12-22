@@ -79,7 +79,7 @@
                                             <tr v-for="(file, index) in material.files" :key="`F${index}`">
                                                 <td>
                                                     <a  class="site-anchor"
-                                                        :href="file.url" target="_blank">
+                                                        :href="getFullFileUrl(file.url)" target="_blank">
                                                         {{ file.name }}
                                                     </a>
                                                 </td>
@@ -164,6 +164,12 @@
             this.arrowsEnabled = !this.isTouchDevice();
         },
         methods: {
+            getFullFileUrl(file_url) {
+                if (this.$base_url.endsWith("/")) {
+                    return `${this.$base_url.slice(0, -1)}${file_url}`
+                }
+                return `${this.$base_url}${file_url}`
+            },
             updateMaterials() {
                 this.emitter.emit('updateMaterial');
                 this.emitter.emit('updateMaterialCrumbs');
