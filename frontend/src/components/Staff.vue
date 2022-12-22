@@ -72,7 +72,7 @@
                     type: "get",
                     dataType: "json",
                     success: (response) => {
-                        this.staffs = []
+                        this.staffs = [];
                         response.forEach((item) => this.updateUser(item));
                     },
                     error: (jqXHR, textStatus, errorThrown) => {
