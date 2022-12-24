@@ -102,7 +102,7 @@ def courses_retrieve_results(query: WebQuery) -> QuerySet:
     return query_set
 
 
-def courses_get_folder(course_id: int) -> str:
+def courses_get_folder(course_id: int) -> Optional[str]:
     try:
         course = LADICourse.objects.get(id=course_id)
     except ObjectDoesNotExist:

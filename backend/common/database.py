@@ -28,11 +28,33 @@ class QueryAttribute(Enum):
 class SortType(Enum):
     ASCENDING = auto()
     DESCENDING = auto()
+    
+
+class WebQueryTypeError(TypeError):
+    """WebQuery type error
+
+    Attributes:
+        wrong_type          --  the type of WebQuery
+        missing_property    --  the property that cannot be accessed
+    """
+    
+    missing_property    :   str
+    wrong_type          :   QueryType
+    
+    
+    def __init__(self, wrong_type: QueryType, missing_property: str) -> None:
+        super().__init__()
+        self.wrong_type = wrong_type
+        self.missing_property = missing_property
+        
+    
+    def __str__(self) -> str:
+        return f"WebQuery of type {self.wrong_type} doesn't have property {self.missing_property}"
 
 
 @dataclass
-class _WebQueryOptions:
-    """ WebQuery class options """
+class WebQueryOptions:
+    """WebQuery class options."""
     
     limit               :   int                                         =   100
     obj_id              :   int                                         =   -1
@@ -45,13 +67,13 @@ class _WebQueryOptions:
     
 
 class WebQuery:
-    """ WebQuery class can be use to query the dbms from an HTTP request and return a json or a db obj """
+    """WebQuery class can be use to query the dbms from an HTTP request and return a json or a db obj."""
     
     
     model               :   Model
-    options             :   _WebQueryOptions  
-    type                :   QueryType                                   =   QueryType.INVALID                        
-    model_search_func   :   Optional[Callable[[WebQuery], QuerySet]]    =   None
+    options             :   WebQueryOptions  
+    type                :   QueryType                                       =   QueryType.INVALID                        
+    model_search_func   :   Optional[Callable[[WebQuery], QuerySet[Any]]]   =   None
     
     
     def __init__(self,
@@ -59,13 +81,13 @@ class WebQuery:
                  model              :   Model,
                  count              :   bool                                        =   False,
                  model_attributes   :   Dict[str, Any]                              =   {},
-                 model_search_func  :   Optional[Callable[[WebQuery], QuerySet]]    =   None,
+                 model_search_func  :   Optional[Callable[[WebQuery], QuerySet[Any]]]    =   None,
                  custom_defaults    :   Optional[Dict[str, Union[int, str, bool]]]  =   None
                  ) -> None:
-        """ Initializer of the WebQuery class """
+        """Initializer of the WebQuery class."""
         
         # Set attributes without default value
-        self.options = _WebQueryOptions()
+        self.options = WebQueryOptions()
         self.model = model
         if not model:
             self.type = QueryType.INVALID
@@ -98,19 +120,23 @@ class WebQuery:
         
         # Set attributes and parameters
         if req_params.get('attributes'):
-            self._set_attributes(attributes_str=req_params.get('attributes'), model_attributes=model_attributes)
+            self._set_attributes(attributes_str=str(req_params.get('attributes')), model_attributes=model_attributes)
         self._set_parameters(req_params) 
     
     
     @property
     def attributes(self) -> Set[Union[QueryAttribute, Any]]:
-        return self.options.attributes if self.type != QueryType.INVALID else {}
+        if self.type == QueryType.INVALID:
+            raise WebQueryTypeError(wrong_type=self.type, missing_property='attributes')
+        return self.options.attributes
     
     
     @property
     def keyword(self) -> str:
         query_by_keyword_types = {QueryType.COUNT_BY_KEYWORD, QueryType.BY_KEYWORD}
-        return self.options.keyword if self.type in query_by_keyword_types else ''
+        if self.type not in query_by_keyword_types:
+            raise WebQueryTypeError(wrong_type=self.type, missing_property='keyword')
+        return self.options.keyword
   
       
     @property 
@@ -120,7 +146,9 @@ class WebQuery:
     
     @property
     def obj_id(self) -> int:
-        return self.options.obj_id if self.type == QueryType.BY_ID else -1
+        if self.type != QueryType.BY_ID:
+            raise WebQueryTypeError(wrong_type=self.type, missing_property='obj_id')
+        return self.options.obj_id
     
         
     @property 
@@ -129,7 +157,7 @@ class WebQuery:
         
         
     def query(self) -> JsonResponse:
-        """ Query the dbms and return a json """
+        """Query the dbms and return a json."""
         
         if self.type == QueryType.INVALID:
             return JsonResponse([], safe=False)
@@ -145,7 +173,7 @@ class WebQuery:
     
     
     def get_object_from_id(self, enforce_public: bool = True) -> Any:
-        """ Get a db object from its id """
+        """Get a db object from its id."""
         
         if self.type != QueryType.BY_ID:
             return None
@@ -167,8 +195,8 @@ class WebQuery:
         return obj
     
     
-    def _get_queryset(self) -> QuerySet:
-        """ Get a QuerySet  """
+    def _get_queryset(self) -> QuerySet[Any]:
+        """Get a QuerySet."""
         
         if self.type not in {QueryType.ALL, QueryType.BY_KEYWORD}:
             return self.model.objects.none()
@@ -196,7 +224,7 @@ class WebQuery:
     
         
     def _set_attributes(self, attributes_str: str, model_attributes: Dict[str, Any]) -> None:
-        """ Used by __init__ to import the attributes """
+        """Used by __init__ to import the attributes."""
         
         attributes = [str(param).strip() for param in attributes_str.split(',')]
         if 'light' in attributes:
@@ -209,26 +237,26 @@ class WebQuery:
                 self.options.attributes.add(value)
             
             
-    def _set_parameters(self, req_params: Dict[str, str]) -> None:
-        """ Set the query options from the request parameters """
+    def _set_parameters(self, req_params: Dict[str, Union[str, List[str]]]) -> None:
+        """Set the query options from the request parameters."""
+        
+        id_func: Callable[[str], Any] = lambda value: int(value) if self.type == QueryType.BY_ID else -1
+        keyword_func: Callable[[str], Any] = lambda value: value if self.type in {QueryType.ALL, QueryType.BY_KEYWORD} else ''
+        sort_func: Callable[[str], Any] = lambda value: SortType.DESCENDING if value  == 'desc'  else SortType.ASCENDING
+        custom_options = {'id': id_func, 'keyword': keyword_func, 'sort': sort_func}
+        allowed_types = {int, str}
+        
         try:       
-            
-            if self.type == QueryType.BY_ID:
-                self.options.obj_id = int(req_params.get('id'))
-            elif self.type == QueryType.BY_KEYWORD:
-                self.options.keyword = req_params['keyword']
-                
-            if req_params.get('limit'):
-                self.options.limit = int(req_params.get('limit'))
-                
-            if req_params.get('offset'):
-                self.options.offset = int(req_params.get('offset'))
-                
-            if req_params.get('sort') == 'desc':
-                self.options.sort = SortType.DESCENDING 
-                
-            if req_params.get('order'):
-                self.options.order_by = req_params['order']
+            for key, type in self.options.__annotations__.items():
+                value = req_params.get(key)
+                if value is None:
+                    continue
+                if type(value) == List[str]:
+                    value = value[0] if len(value) > 0 else ''
+                if key in custom_options:
+                    setattr(self.options, key, custom_options[key](value))
+                elif type in allowed_types:
+                    setattr(self.options, key, type(value))
                 
         except KeyError:
             self.type = QueryType.INVALID
@@ -243,10 +271,10 @@ class WebQuery:
             return
         
         
-    def _json_from_queryset(self, query_set: QuerySet) -> JsonResponse:
-        """ Get a json from a QuerySet """
+    def _json_from_queryset(self, query_set: QuerySet[Any]) -> JsonResponse:
+        """Get a json from a QuerySet."""
         
-        if not query_set.count:
+        if not query_set.count():
             return JsonResponse(data=[], safe=False)
         
         # SELECT fix number of elements
@@ -269,7 +297,7 @@ class WebQuery:
         
         
     def _json_from_object(self, obj: Any) -> JsonResponse:
-        """ Get a json from a db object """
+        """Get a json from a db object."""
         
         if self.type != QueryType.BY_ID or not obj:
             return JsonResponse(data=[], safe=False)
@@ -283,11 +311,11 @@ class WebQuery:
                 if type(value) != str and type(value) != int:
                     obj[key] = str(obj[key])
             return JsonResponse(data=obj, safe=True)
-
+     
      
     @staticmethod
-    def _lighten_data_list(data_list: List[Dict[str, Any]]) -> List[str, Any]:
-        """ Remove some large fields from a dict containing the db objects attributes """
+    def _lighten_data_list(data_list: List[Dict[str, Any]]) -> None:
+        """Remove some large fields from a dict containing the db objects attributes."""
         for idx, item in enumerate(data_list):
             big_fields = {'html', 'text', 'description'}.intersection(item.keys())
             for key in big_fields:
@@ -295,8 +323,8 @@ class WebQuery:
         
         
     @staticmethod
-    def _parse_GET(request: HttpRequest) -> Dict[str, str]:
-        """ Check that the GET request and return a dict"""
+    def _parse_GET(request: HttpRequest) -> Dict[str, Union[str, List[str]]]:
+        """Check that the GET request and return a dict."""
         
         if request.method != 'GET':
             raise SuspiciousOperation("GET requests only")
