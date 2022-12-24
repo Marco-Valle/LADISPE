@@ -141,6 +141,8 @@ class WebQuery:
       
     @property 
     def light(self) -> bool:
+        if self.type == QueryType.INVALID:
+            raise WebQueryTypeError(wrong_type=self.type, missing_property='light')
         return QueryAttribute.LIGHT in self.options.attributes
     
     
@@ -153,6 +155,8 @@ class WebQuery:
         
     @property 
     def public(self) -> bool:
+        if self.type == QueryType.INVALID:
+            raise WebQueryTypeError(wrong_type=self.type, missing_property='public')
         return QueryAttribute.PUBLIC in self.options.attributes
         
         
