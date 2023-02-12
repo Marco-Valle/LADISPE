@@ -11,7 +11,7 @@ from typing import List, Dict, Union
 from ladicourses.models import LADICourse, LADILecture
 
  
-material_empty_response = JsonResponse([{'title': '', 'breadcrumbs': [], 'files': []}], safe=False)
+MATERIAL_EMPTY_RESPONSE = JsonResponse([{'title': '', 'breadcrumbs': [], 'files': []}], safe=False)
 
 
 # LADICourse
@@ -42,7 +42,8 @@ def get_courses_lectures(request: HttpRequest) -> JsonResponse:
     if not course:
         return JsonResponse([], safe=False)
     if not course.public and not request.user.is_superuser:
-        if request.user != course.professor and request.user != course.first_assistant and request.user != course.second_assistant:
+        allowed_users = {course.professor, course.first_assistant, course.second_assistant}
+        if request.user not in allowed_users:
             return JsonResponse([], safe=False)
     query_set = LADILecture.objects.filter(course_id=course.id)
     query_set = query_set.order_by('timestamp').reverse()
@@ -62,7 +63,7 @@ def get_courses_materials(request: HttpRequest) -> JsonResponse:
     course = query.get_object_from_id()
     materials_path = courses_get_folder(course.id)
     if not materials_path:
-        return material_empty_response
+        return MATERIAL_EMPTY_RESPONSE
     root_files = next(walk(materials_path), (None, None, []))[2]    # Add root directory
     result = [{'title': '', 'breadcrumbs': [],
                'files': [courses_pack_file(file, materials_path) for file in root_files]}]
