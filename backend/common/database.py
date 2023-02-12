@@ -1,4 +1,5 @@
 from __future__ import annotations
+import builtins
 from django.http import JsonResponse
 from django.core.exceptions import SuspiciousOperation, ObjectDoesNotExist, FieldError
 from django.forms.models import model_to_dict
@@ -247,20 +248,20 @@ class WebQuery:
         id_func: Callable[[str], Any] = lambda value: int(value) if self.type == QueryType.BY_ID else -1
         keyword_func: Callable[[str], Any] = lambda value: value if self.type in {QueryType.ALL, QueryType.BY_KEYWORD} else ''
         sort_func: Callable[[str], Any] = lambda value: SortType.DESCENDING if value  == 'desc'  else SortType.ASCENDING
-        custom_options = {'id': id_func, 'keyword': keyword_func, 'sort': sort_func}
-        allowed_types = {int, str}
+        custom_options = {'obj_id': id_func, 'keyword': keyword_func, 'sort': sort_func}
+        trusted_types = {'int', 'str'}
         
         try:       
-            for key, type in self.options.__annotations__.items():
-                value = req_params.get(key)
+            for key, param_type in self.options.__annotations__.items():
+                value = req_params.get(key) if key != 'obj_id' else req_params.get('id')
                 if value is None:
                     continue
                 if type(value) == List[str]:
                     value = value[0] if len(value) > 0 else ''
                 if key in custom_options:
                     setattr(self.options, key, custom_options[key](value))
-                elif type in allowed_types:
-                    setattr(self.options, key, type(value))
+                elif param_type in trusted_types:
+                    setattr(self.options, key, getattr(builtins, param_type)(value))
                 
         except KeyError:
             self.type = QueryType.INVALID
