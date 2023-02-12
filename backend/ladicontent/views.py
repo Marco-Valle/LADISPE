@@ -151,6 +151,7 @@ def get_galleries_count(request: HttpRequest) -> JsonResponse:
 
 
 def get_gallery_pictures(request: HttpRequest) -> JsonResponse:
+    """ Get the pictures of a specific LadiGallery """
     query = WebQuery(request=request,
                      model=LADIGallery,
                      count=False,
