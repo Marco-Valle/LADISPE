@@ -1,25 +1,27 @@
+from os import sep
 from os.path import join
 from re import sub, match
-from typing import Set, Tuple, Pattern, Union
+from typing import Set, Tuple
   
 
 def safe_path(trusted_part: Tuple[str], untrusted_part: Tuple[str]) -> str:
     
-    def sanitize_path_recursive(path: str, unsafe_symbols: Set[str], unsafe_regex: Set[Union[str, Pattern[str]]]) -> str:
+    def sanitize_path_recursive(path: str, unsafe_symbols: Set[str]) -> str:
         safe = True
         for symbol in unsafe_symbols:
-            safe &= not path.startswith(symbol)
-            path = path.lstrip(symbol)
-        for regex in unsafe_regex:
-            safe &= not bool(match(regex, path))
-            path = sub(regex, "", path)
-        return path if safe else sanitize_path_recursive(path=path, unsafe_regex=unsafe_regex, unsafe_symbols=unsafe_symbols)
+            if symbol in path:
+                path = path.replace(symbol, '__')
+                safe = False
+        if match(r'^[A-z]:', path):
+            # Windows drive at the beginning of the path
+            path = sub(r'^[A-z]:', f"{path[0]}__:", path)
+            safe = False
+        return path if safe else sanitize_path_recursive(path=path, unsafe_symbols=unsafe_symbols)
     
     def sanitize_path(path: str) -> str:
         unsafe_symbols = {'/', '..', '\\'}
-        unsafe_regex = {r'^[A-z]:'}
         try:
-            return sanitize_path_recursive(path=path, unsafe_regex=unsafe_regex, unsafe_symbols=unsafe_symbols)
+            return sanitize_path_recursive(path=path, unsafe_symbols=unsafe_symbols)
         except RecursionError:
             return ''
     
