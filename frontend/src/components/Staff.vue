@@ -6,7 +6,7 @@
             <v-col>
                 <v-row justify="center" align="center">
                     <v-col md="1">
-                        <RefreshIcon icon="mdi-account-group-outline" clickEvent="updateStaffs" />
+                        <RefreshIcon icon="mdi-account-group-outline" clickEvent="updateStaffs" :userLang="userLang" />
                     </v-col>
                     <v-col>
                         <h3 id="staff-title" >LADI staff</h3>

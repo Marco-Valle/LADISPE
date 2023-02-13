@@ -6,7 +6,7 @@
             
             <v-col>
 
-                <RefreshIcon icon="mdi-bookshelf" clickEvent="updateMaterials" />
+                <RefreshIcon icon="mdi-bookshelf" clickEvent="updateMaterials" :userLang="userLang" />
                 <v-spacer />
 
                 <v-carousel hide-delimiters :progress="progressBarColor" :show-arrows="arrowsEnabled">

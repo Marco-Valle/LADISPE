@@ -5,7 +5,7 @@
             <!-- In evidence news -->
             <v-col>
 
-                <RefreshIcon icon="mdi-newspaper" clickEvent="updateNewsInEvidence" />
+                <RefreshIcon icon="mdi-newspaper" clickEvent="updateNewsInEvidence" :userLang="userLang" />
                 <v-spacer />
 
                 <v-carousel class="my-carousel"

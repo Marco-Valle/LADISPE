@@ -5,7 +5,7 @@
             <!-- Lectures -->
             <v-col>
 
-                <RefreshIcon icon="mdi-book" clickEvent="updateLectures" />
+                <RefreshIcon icon="mdi-book" clickEvent="updateLectures" :userLang="userLang" />
                 <v-spacer />
 
                 <v-carousel class="my-carousel"  
