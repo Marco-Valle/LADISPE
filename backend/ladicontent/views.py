@@ -177,7 +177,7 @@ def galleries_retrieve_results(query: WebQuery) -> QuerySet:
 # LADIStaff
 
 def get_staffs(request: HttpRequest) -> JsonResponse:
-    """Get LADIStaff """
+    """Get LADIStaff."""
     query = WebQuery(request=request,
                      model=LADIStaff,
                      count=False,
@@ -204,7 +204,7 @@ def staffs_retrieve_results(query: WebQuery) -> QuerySet:
 # LADIForms
 
 def get_forms(request: HttpRequest) -> JsonResponse:
-    """Get LADIForm """
+    """Get LADIForm."""
     query = WebQuery(request=request,
                      model=LADIForm,
                      count=False,

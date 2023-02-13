@@ -45,7 +45,7 @@ class LADIPicture(models.Model):
     """
     LADIPicture db model
     Galleries' pictures (not accessible from the file browser)
-    They can be linked to a news (ex. homepage) or with an external link (not both)
+    They can be linked to a news (ex. homepage) or with an external link (not both).
     """
     
     timestamp = models.DateTimeField(auto_now=True)

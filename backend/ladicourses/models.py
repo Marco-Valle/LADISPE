@@ -9,7 +9,7 @@ User = settings.AUTH_USER_MODEL
 
 
 class LADICourse(models.Model):
-    """ LADICourse db model """
+    """LADICourse db model."""
 
     timestamp = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=True)
@@ -28,7 +28,7 @@ class LADICourse(models.Model):
 
 
 class LADILecture(models.Model):
-    """ LADILecture db model """
+    """LADILecture db model."""
 
     timestamp = models.DateTimeField(auto_now=True)
     course = models.ForeignKey(LADICourse, on_delete=models.CASCADE)

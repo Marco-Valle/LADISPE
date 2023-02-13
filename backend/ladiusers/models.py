@@ -6,7 +6,7 @@ from typing import Any
 
 
 class LADIUser(AbstractBaseUser, PermissionsMixin):
-    """LADIUSer db model """
+    """LADIUSer db model."""
     
     email = models.EmailField(
         verbose_name='email address',
