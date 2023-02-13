@@ -6,16 +6,18 @@ from backend.settings import MEDIA_ROOT, FILEBROWSER_DIRECTORY
 from os import path, makedirs, rename
 from ladicourses.models import LADICourse, LADILecture
 from typing import Any, Optional
+from common.utils import safe_path
+
 
 logger = logging.getLogger(__name__)
 
 
 class CourseAuthorAdmin(admin.ModelAdmin):
-    """ The ModelClass for LADICourse """
+    """The ModelClass for LADICourse."""
 
 
     def save_form(self, request: HttpRequest, form: Any, change: bool) -> LADICourse:
-        """ This function is called when a user tries to save an object in the Django admin portal """
+        """This function is called when a user tries to save an object in the Django admin portal."""
         
         obj = super().save_form(request, form, change)
         if change:
@@ -39,23 +41,23 @@ class CourseAuthorAdmin(admin.ModelAdmin):
 
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[LADICourse] = None) -> bool:
-        """ Check if the user is allowed to modify the object in the admin portal """
+        """Check if the user is allowed to modify the object in the admin portal."""
         return CourseAuthorAdmin.check_ownership(request, obj)
 
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[LADICourse] = None) -> bool:
-        """ Check if the user is allowed to delete the object in the admin portal """
+        """Check if the user is allowed to delete the object in the admin portal."""
         return CourseAuthorAdmin.check_ownership(request, obj)
 
 
     def has_module_permission(self, request: HttpRequest) -> bool:
-        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
+        """Check if the user is allowed to visualize the instances of a specific class in the admin portal."""
         return request.user.is_superuser or 'ladicourses.view_ladicourse' in request.user.get_group_permissions()
 
 
     @staticmethod
     def check_ownership(request, obj: Optional[LADICourse], default_no_owner: bool = True) -> bool:
-        """ Check if the user has the ownership in a specific object """
+        """Check if the user has the ownership in a specific object."""
         if not obj or request.user.is_superuser:
             return True
         try:
@@ -68,9 +70,10 @@ class CourseAuthorAdmin(admin.ModelAdmin):
 
     @staticmethod
     def update_course_directory(obj: LADICourse, old_title: Optional[str] = None) -> None:
-        """ Create or rename a directory for the course material """
+        """Create or rename a directory for the course material."""
         
-        course_dir = path.join(MEDIA_ROOT, FILEBROWSER_DIRECTORY, 'Users', str(obj.professor_id), obj.title)
+        course_dir = safe_path( trusted_part=(MEDIA_ROOT, FILEBROWSER_DIRECTORY, 'Users'),
+                                untrusted_part=(str(obj.professor_id), obj.title))
         if not old_title and not path.isdir(course_dir):
             try:
                 makedirs(course_dir)
@@ -82,7 +85,8 @@ class CourseAuthorAdmin(admin.ModelAdmin):
                            "({} - prof_id: {})".format(obj.title, obj.professor_id))
         else:
             try:
-                old_path = path.join(MEDIA_ROOT, FILEBROWSER_DIRECTORY, 'Users', str(obj.professor_id), old_title)
+                old_path = safe_path(   trusted_part=(MEDIA_ROOT, FILEBROWSER_DIRECTORY, 'Users'),
+                                        untrusted_part=(str(obj.professor_id), old_title))
                 rename(old_path, course_dir)
             except OSError:
                 logger.warning("Can't move the course folder ({} - prof_id: {})".format(obj.title, obj.professor_id))
@@ -90,11 +94,11 @@ class CourseAuthorAdmin(admin.ModelAdmin):
 
 
 class LectureAuthorAdmin(admin.ModelAdmin):
-    """ The ModelClass for LADILecture """
+    """The ModelClass for LADILecture."""
 
 
     def save_form(self, request: HttpRequest, form: Any, change: bool) -> LADILecture:
-        """ This function is called when a user tries to save an object in the admin portal """
+        """This function is called when a user tries to save an object in the admin portal."""
         
         if not request.user.is_superuser:
             course_id = request.POST.get('course')
@@ -108,23 +112,23 @@ class LectureAuthorAdmin(admin.ModelAdmin):
 
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[LADILecture] = None) -> bool:
-        """ Check if the user is allowed to modify the object in the admin portal """
+        """Check if the user is allowed to modify the object in the admin portal."""
         return LectureAuthorAdmin.check_ownership(request, obj)
 
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[LADILecture] = None) -> bool:
-        """ Check if the user is allowed to delete the object in the admin portal """
+        """Check if the user is allowed to delete the object in the admin portal."""
         return LectureAuthorAdmin.check_ownership(request, obj)
 
 
     def has_module_permission(self, request: HttpRequest) -> bool:
-        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
+        """Check if the user is allowed to visualize the instances of a specific class in the admin portal."""
         return request.user.is_superuser or 'ladicourses.view_ladilecture' in request.user.get_group_permissions()
 
 
     @staticmethod
     def check_ownership(request, obj: Optional[LADILecture]) -> bool:
-        """ Check if the user has the ownership in a specific object """
+        """Check if the user has the ownership in a specific object."""
         if not obj or request.user.is_superuser:
             return True
         if obj.course.first_assistant == request.user or obj.course.second_assistant == request.user:

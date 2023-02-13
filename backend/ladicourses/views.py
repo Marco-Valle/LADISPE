@@ -8,6 +8,7 @@ from time import strftime, localtime
 from filebrowser.base import FileObject
 from typing import List, Dict, Union
 
+from common.utils import safe_path
 from ladicourses.models import LADICourse, LADILecture
 
  
@@ -17,7 +18,7 @@ MATERIAL_EMPTY_RESPONSE = JsonResponse([{'title': '', 'breadcrumbs': [], 'files'
 # LADICourse
 
 def get_courses(request: HttpRequest) -> JsonResponse:
-    """ Get LADICourse """
+    """Get LADICourse."""
     query = WebQuery(request=request,
                      model=LADICourse,
                      count=False,
@@ -27,7 +28,7 @@ def get_courses(request: HttpRequest) -> JsonResponse:
 
 
 def get_courses_count(request: HttpRequest) -> JsonResponse:
-    """ Get LADICourse rows count """
+    """Get LADICourse rows count."""
     query = WebQuery(request=request,
                      model=LADICourse,
                      count=True,
@@ -37,6 +38,7 @@ def get_courses_count(request: HttpRequest) -> JsonResponse:
 
 
 def get_courses_lectures(request: HttpRequest) -> JsonResponse:
+    """Get all the LADILecture of a specific LADICourse (specified with GET parameters id)."""
     query = WebQuery(request=request, model=LADICourse, count=False)
     course = query.get_object_from_id(enforce_public=False)
     if not course:
@@ -108,7 +110,8 @@ def courses_get_folder(course_id: int) -> Optional[str]:
         course = LADICourse.objects.get(id=course_id)
     except ObjectDoesNotExist:
         return None
-    course_dir = path.join(MEDIA_ROOT, FILEBROWSER_DIRECTORY, 'Users', str(course.professor_id), course.title)
+    course_dir = safe_path( trusted_part=(MEDIA_ROOT, FILEBROWSER_DIRECTORY, 'Users'),
+                            untrusted_part=(str(course.professor_id), course.title))
     if not path.isdir(course_dir):
         return None
     return course_dir
@@ -146,7 +149,7 @@ def courses_sort_material(materials: List[Dict[str, Union[str, List[str], List[D
 # LADILecture
 
 def get_lectures(request: HttpRequest) -> JsonResponse:
-    """ Get LADICourse """
+    """Get LADICourse."""
     query = WebQuery(request=request,
                      model=LADILecture,
                      count=False,
@@ -156,7 +159,7 @@ def get_lectures(request: HttpRequest) -> JsonResponse:
 
 
 def get_lectures_count(request: HttpRequest) -> JsonResponse:
-    """ Get LADICourse rows count """
+    """Get LADICourse rows count."""
     query = WebQuery(request=request,
                      model=LADILecture,
                      count=True,
