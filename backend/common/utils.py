@@ -5,6 +5,8 @@ from typing import Set, Tuple
   
 
 def safe_path(trusted_part: Tuple[str], untrusted_part: Tuple[str]) -> str:
+    """Returns the path obtained with os.join().
+    The untrusted part is sanitized in order to avoid unsafe patterns in the path."""
     
     def sanitize_path_recursive(path: str, unsafe_symbols: Set[str]) -> str:
         safe = True
@@ -24,6 +26,5 @@ def safe_path(trusted_part: Tuple[str], untrusted_part: Tuple[str]) -> str:
             return sanitize_path_recursive(path=path, unsafe_symbols=unsafe_symbols)
         except RecursionError:
             return ''
-    
     
     return join(*trusted_part, *map(sanitize_path, untrusted_part))
