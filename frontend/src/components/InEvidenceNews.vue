@@ -30,7 +30,7 @@
                                 <v-card-text v-if="newsSettings.showText && item.text !== ''" >
                                     {{ item.text }}
                                 </v-card-text>
-                                <v-card-actions>
+                                <v-card-actions v-if="item.link != null || item.openButtonEnabled">
                                     <v-row justify="center" allign="center">
                                         <v-col v-if="item.link != null">
                                             <v-btn elevation="5" outlined class="my-button"
@@ -38,7 +38,7 @@
                                                 <h4>Link</h4>
                                             </v-btn>
                                         </v-col>
-                                        <v-col>
+                                        <v-col v-if="item.openButtonEnabled">
                                             <v-btn elevation="5" outlined class="my-button"
                                                    @click="emitNewsSearch(item.id)" >
                                                 <h4 v-if="userLang === 'it'">Apri</h4>
@@ -220,6 +220,7 @@
                                 news.text = news.text.slice(0, this.textMaxLen) + '...';
                             }
                             news.visibleTitle = this.truncateTitle(news.title);
+                            news.openButtonEnabled = news.text.length > 0;
                             this.newsInEvidence.push(news);
                         });
                         this.adjustNewsBatches();
