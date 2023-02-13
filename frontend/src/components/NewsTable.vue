@@ -197,7 +197,7 @@
                 this.table.sortable.order = order;
                 this.table.sortable.sort = sort;
                 // If the search field is empty search all
-                const keyword = this.tableHeader.searchedText !== '' ? this.tableHeader.searchedText : '*';
+                const keyword = this.tableHeader.searchedText !== '' && this.tableHeader.searchedText != null ? this.tableHeader.searchedText : '*';
                 const tmpUrl = `?keyword=${ keyword }&offset=${ offset }&limit=${ limit }&order=${ order }&sort=${ sort }`;
                 $.ajax({
                     url: this.newsUrl + tmpUrl,
