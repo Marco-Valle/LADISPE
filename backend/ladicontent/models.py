@@ -10,7 +10,7 @@ User = settings.AUTH_USER_MODEL
 
 
 class LADINews(models.Model):
-    """ LADINews db model """
+    """LADINews db model."""
 
     timestamp = models.DateTimeField(auto_now=True)
     cover = models.ImageField(upload_to='news/%Y/%m/%d/', default='default.png')
@@ -28,7 +28,7 @@ class LADINews(models.Model):
 
 
 class LADIGallery(models.Model):
-    """ LADIGallery db model """
+    """LADIGallery db model."""
 
     title = models.CharField(   max_length=30, 
                                 unique=True, 
@@ -42,7 +42,7 @@ class LADIGallery(models.Model):
 
 
 class LADIPicture(models.Model):
-    """ 
+    """
     LADIPicture db model
     Galleries' pictures (not accessible from the file browser)
     They can be linked to a news (ex. homepage) or with an external link (not both)
@@ -65,7 +65,7 @@ class LADIPicture(models.Model):
 
 
 class LADIStory(models.Model):
-    """ LADIStory db model """
+    """LADIStory db model."""
 
     STORY_TYPES = (
         (1, 'Story'),
@@ -88,7 +88,7 @@ class LADIStory(models.Model):
 
 
 class LADIStaff(models.Model):
-    """ LADIStaff db model """
+    """LADIStaff db model."""
 
     cover = models.ImageField(upload_to='staff/%Y/%m/%d/', default='default.png')
     user = models.ForeignKey(User, on_delete=models.CASCADE,
@@ -102,7 +102,7 @@ class LADIStaff(models.Model):
 
 
 class LADIForm(models.Model):
-    """ LADIForm db model """
+    """LADIForm db model."""
 
     title = models.CharField(max_length=70, blank=False, unique=True)
     file = models.FileField(upload_to='forms/')

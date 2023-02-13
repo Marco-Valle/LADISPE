@@ -16,12 +16,12 @@ nested_ownership = {
 
 
 class AuthorAdmin(admin.ModelAdmin):
-    """ The class used to manage the admin page permissions for LADIContent, based on ownership """
+    """The class used to manage the admin page permissions for LADIContent, based on ownership."""
 
 
     def save_form(self, request: HttpRequest, form: Any, change: bool
                   ) -> Union[LADIForm, LADINews, LADIStory, LADIGallery, LADIPicture, LADIStaff]:
-        """ This function is called when a user tries to save an object in the Django admin portal """
+        """This function is called when a user tries to save an object in the Django admin portal."""
         
         obj = super().save_form(request, form, change)
         if not request.user.is_superuser and type(obj) == LADIPicture:
@@ -42,7 +42,7 @@ class AuthorAdmin(admin.ModelAdmin):
                               request: HttpRequest,
                               obj: Optional[Union[LADIForm, LADINews, LADIStory, LADIGallery, LADIPicture, LADIStaff]] = None
                               ) -> bool:
-        """ Check if the user is allowed to modify the object in the admin portal """
+        """Check if the user is allowed to modify the object in the admin portal."""
         return AuthorAdmin.check_ownership(request, obj)
 
 
@@ -50,7 +50,7 @@ class AuthorAdmin(admin.ModelAdmin):
                               request: HttpRequest,
                               obj: Optional[Union[LADIForm, LADINews, LADIStory, LADIGallery, LADIPicture, LADIStaff]] = None
                               ) -> bool:
-        """ Check if the user is allowed to delete the object in the admin portal """
+        """Check if the user is allowed to delete the object in the admin portal."""
         return AuthorAdmin.check_ownership(request, obj)
 
 
@@ -58,7 +58,7 @@ class AuthorAdmin(admin.ModelAdmin):
     def check_ownership(request: HttpRequest,
                         obj: Union[LADIForm, LADINews, LADIStory, LADIGallery, LADIPicture, LADIStaff],
                         default_no_owner: bool = True) -> bool:
-        """ Check if the user has the ownership in a specific object """
+        """Check if the user has the ownership in a specific object."""
         
         if not obj or request.user.is_superuser:
             return True
@@ -75,61 +75,61 @@ class AuthorAdmin(admin.ModelAdmin):
 
     @staticmethod
     def check_model_permission(obj: Union[LADIForm, LADINews, LADIStory, LADIGallery, LADIPicture, LADIStaff], user: LADIUser) -> bool:
-        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
+        """Check if the user is allowed to visualize the instances of a specific class in the admin portal."""
         return user.is_superuser or 'ladicontent.view_{}'.format(obj.__name__.lower()) in user.get_group_permissions()
 
 
 
 class NewsAuthorAdmin(AuthorAdmin):
-    """ The class used to manage the admin page permissions for LADINews, based on ownership """
+    """The class used to manage the admin page permissions for LADINews, based on ownership."""
 
     def has_module_permission(self, request):
-        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
+        """Check if the user is allowed to visualize the instances of a specific class in the admin portal."""
         return AuthorAdmin.check_model_permission(LADINews, request.user)
 
 
 
 class GalleryAuthorAdmin(AuthorAdmin):
-    """ The class used to manage the admin page permissions for LADIGallery, based on ownership """
+    """The class used to manage the admin page permissions for LADIGallery, based on ownership."""
 
     def has_module_permission(self, request):
-        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
+        """Check if the user is allowed to visualize the instances of a specific class in the admin portal."""
         return AuthorAdmin.check_model_permission(LADIGallery, request.user)
 
 
 
 class PictureAuthorAdmin(AuthorAdmin):
-    """ The class used to manage the admin page permissions for LADIPicture, based on ownership """
+    """The class used to manage the admin page permissions for LADIPicture, based on ownership."""
 
     def has_module_permission(self, request: HttpRequest) -> bool:
-        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
+        """Check if the user is allowed to visualize the instances of a specific class in the admin portal."""
         return AuthorAdmin.check_model_permission(LADIPicture, request.user)
 
 
 
 class StoryAuthorAdmin(AuthorAdmin):
-    """ The class used to manage the admin page permissions for LADIStory, based on ownership """
+    """The class used to manage the admin page permissions for LADIStory, based on ownership."""
 
     def has_module_permission(self, request):
-        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
+        """Check if the user is allowed to visualize the instances of a specific class in the admin portal."""
         return AuthorAdmin.check_model_permission(LADIStory, request.user)
 
 
 
 class StaffAuthorAdmin(AuthorAdmin):
-    """ The class used to manage the admin page permissions for LADIStaff, based on ownership """
+    """The class used to manage the admin page permissions for LADIStaff, based on ownership."""
 
     def has_module_permission(self, request: HttpRequest) -> bool:
-        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
+        """Check if the user is allowed to visualize the instances of a specific class in the admin portal."""
         return AuthorAdmin.check_model_permission(LADIStaff, request.user)
 
 
 
 class FormAuthorAdmin(AuthorAdmin):
-    """ The class used to manage the admin page permissions for LADIForm, based on ownership """
+    """The class used to manage the admin page permissions for LADIForm, based on ownership."""
 
     def has_module_permission(self, request: HttpRequest) -> bool:
-        """ Check if the user is allowed to visualize the instances of a specific class in the admin portal """
+        """Check if the user is allowed to visualize the instances of a specific class in the admin portal."""
         return AuthorAdmin.check_model_permission(LADIForm, request.user)
 
 

@@ -8,7 +8,7 @@ from ladicourses.models import LADICourse
 
 
 def get_user(request: HttpRequest) -> JsonResponse:
-    """ Get a LADIUSer serialized as json from a HTTP request """
+    """Get a LADIUSer serialized as json from a HTTP request."""
     
     # Only user searches by ID are allowed
     parameters = get_request(request)
@@ -50,7 +50,7 @@ def get_user(request: HttpRequest) -> JsonResponse:
 
 
 def get_request(request: HttpRequest) -> Dict[str, str]:
-    """ Check for GET request and parse the parameters into a dict """
+    """Check for GET request and parse the parameters into a dict."""
     if request.method != 'GET':
         raise SuspiciousOperation("GET requests only")
     # Get the parameters from the request
@@ -58,7 +58,7 @@ def get_request(request: HttpRequest) -> Dict[str, str]:
 
 
 def search_by_id(my_id: int) -> LADIUser:
-    """ Get a LADIUser from its id """
+    """Get a LADIUser from its id."""
     try:
         return LADIUser.objects.get(id=my_id)
     except ObjectDoesNotExist:

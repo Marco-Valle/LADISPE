@@ -14,14 +14,14 @@ ldap.set_option(ldap.OPT_REFERRALS, 0)
 
 
 class CustomLDAPBackend(ModelBackend):
-    """ Custom authentication backend to allow auth with LDAP """
+    """Custom authentication backend to allow auth with LDAP."""
 
     def authenticate(self,
                      request: HttpRequest,
                      username: Optional[str] = None,
                      password: Optional[str] = None,
                      **kwars) -> Optional[LADIUser]:
-        """ Implementation of the required Django authenticate() method """
+        """Implementation of the required Django authenticate() method."""
 
         if username is None:
             return None

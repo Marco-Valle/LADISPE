@@ -13,7 +13,7 @@ from ladiusers.models import LADIUser
 
 # Create ModelForm based on the Group model.
 class GroupAdminForm(forms.ModelForm):
-    """ The ModelForm for the the management of groups in the admin page """
+    """The ModelForm for the the management of groups in the admin page."""
     
     class Meta:
         model = Group
@@ -52,7 +52,7 @@ class GroupAdminForm(forms.ModelForm):
 
 
 class GroupAdmin(admin.ModelAdmin):
-    """ The ModelClass for the management of groups in the admin page """
+    """The ModelClass for the management of groups in the admin page."""
     
     # Use our custom form.
     form = GroupAdminForm
@@ -62,7 +62,7 @@ class GroupAdmin(admin.ModelAdmin):
 
 
 class CustomUserAdmin(UserAdmin):
-    """ The ModelClass for LADIUser """
+    """The ModelClass for LADIUser."""
 
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
@@ -85,7 +85,7 @@ class CustomUserAdmin(UserAdmin):
 
 
     def save_form(self, request: HttpRequest, form: Any, change: bool) -> LADIUser:
-        """ This function is called when a user tries to save an object in the Django admin portal """
+        """This function is called when a user tries to save an object in the Django admin portal."""
         
         if not request.user.is_superuser:
             try:

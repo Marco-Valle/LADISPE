@@ -6,7 +6,7 @@ from typing import Any
 
 
 class LADIUser(AbstractBaseUser, PermissionsMixin):
-    """ LADIUSer db model """
+    """LADIUSer db model """
     
     email = models.EmailField(
         verbose_name='email address',
@@ -33,49 +33,49 @@ class LADIUser(AbstractBaseUser, PermissionsMixin):
 
 
     def get_full_name(self) -> str:
-        """ Get the firstname and the surname of the user together """
+        """Get the firstname and the surname of the user together."""
         return '{} {}'.format(self.name, self.surname)
 
 
     def get_short_name(self) -> str:
-        """ Get the surname of the user """
+        """Get the surname of the user."""
         return self.surname
 
 
     def __str__(self) -> str:
-        """ String representation of LADIUser """
+        """String representation of LADIUser."""
         return '{} {} - {}'.format(self.name, self.surname, self.email)
 
 
     def has_perm(self, perm: str, obj: Any = None) -> bool:
-        """ Check if the user has a specific permission checking the groups policies """
+        """Check if the user has a specific permission checking the groups policies."""
         return self.active and (self.superuser or (self.staff and perm in self.get_group_permissions()))
 
 
     def has_module_perms(self, app_label: str) -> bool:
-        """ Check if the user is allowed to see the app_label for a specific class in the admin page """
+        """Check if the user is allowed to see the app_label for a specific class in the admin page."""
         return True
 
 
     @property
     def is_professor(self) -> bool:
-        """ Property: if user is a professor """
+        """Property: if user is a professor."""
         return self.groups.filter(name='Professors').exists()
 
 
     @property
     def is_borsista(self) -> bool:
-        """ Property: if user is a borsista (intern) """
+        """Property: if user is a borsista (intern)."""
         return self.groups.filter(name='Borsisti').exists()
 
 
     @property
     def is_staff(self) -> bool:
-        """ Property: if user is staff (he has access to the admin page) """
+        """Property: if user is staff (he has access to the admin page)."""
         return self.staff
 
 
     @property
     def is_superuser(self) -> bool:
-        """ Property: if user is a superuser (admin) """
+        """Property: if user is a superuser (admin)."""
         return self.superuser

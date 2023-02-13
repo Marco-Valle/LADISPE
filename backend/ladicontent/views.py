@@ -20,7 +20,7 @@ class StoryAttribute(Enum):
 # LADINews
 
 def get_news(request: HttpRequest) -> JsonResponse:
-    """ Get LADINews """
+    """Get LADINews."""
     query = WebQuery(request=request,
                      model=LADINews,
                      count=False,
@@ -31,7 +31,7 @@ def get_news(request: HttpRequest) -> JsonResponse:
 
 
 def get_news_count(request: HttpRequest) -> JsonResponse:
-    """ Get LADINews rows count """
+    """Get LADINews rows count."""
     query = WebQuery(request=request,
                      model=LADINews,
                      count=True,
@@ -56,7 +56,7 @@ def news_retrieve_results(query: WebQuery) -> QuerySet:
 # LADIPicture
 
 def get_pictures(request: HttpRequest) -> JsonResponse:
-    """ Get LADIPicture """
+    """Get LADIPicture."""
     query = WebQuery(request=request,
                      model=LADIPicture,
                      custom_defaults={'limit': 10},
@@ -67,7 +67,7 @@ def get_pictures(request: HttpRequest) -> JsonResponse:
 
 
 def get_pictures_count(request: HttpRequest) -> JsonResponse:
-    """ Get LADIPicture rows count """
+    """Get LADIPicture rows count."""
     query = WebQuery(request=request,
                      model=LADIPicture,
                      count=True,
@@ -86,7 +86,7 @@ def pictures_retrieve_results(query: WebQuery) -> QuerySet:
 # LADIStory
 
 def get_stories(request: HttpRequest) -> JsonResponse:
-    """ Get LADIStory """
+    """Get LADIStory."""
     query = WebQuery(request=request,
                      model=LADIStory,
                      count=False,
@@ -100,7 +100,7 @@ def get_stories(request: HttpRequest) -> JsonResponse:
 
 
 def get_stories_count(request: HttpRequest) -> JsonResponse:
-    """ Get LADIStory rows count """
+    """Get LADIStory rows count."""
     query = WebQuery(request=request,
                      model=LADIStory,
                      count=True,
@@ -131,7 +131,7 @@ def stories_retrieve_results(query: WebQuery) -> QuerySet:
 # LADIGallery
 
 def get_galleries(request: HttpRequest) -> JsonResponse:
-    """ Get LADIGallery """
+    """Get LADIGallery."""
     query = WebQuery(request=request,
                      model=LADIGallery,
                      count=False,
@@ -141,7 +141,7 @@ def get_galleries(request: HttpRequest) -> JsonResponse:
 
 
 def get_galleries_count(request: HttpRequest) -> JsonResponse:
-    """ Get LADIGallery rows count """
+    """Get LADIGallery rows count."""
     query = WebQuery(request=request,
                      model=LADIGallery,
                      count=True,
@@ -151,7 +151,7 @@ def get_galleries_count(request: HttpRequest) -> JsonResponse:
 
 
 def get_gallery_pictures(request: HttpRequest) -> JsonResponse:
-    """ Get the pictures of a specific LadiGallery """
+    """Get the pictures of a specific LadiGallery."""
     query = WebQuery(request=request,
                      model=LADIGallery,
                      count=False,
@@ -177,7 +177,7 @@ def galleries_retrieve_results(query: WebQuery) -> QuerySet:
 # LADIStaff
 
 def get_staffs(request: HttpRequest) -> JsonResponse:
-    """ Get LADIStaff """
+    """Get LADIStaff """
     query = WebQuery(request=request,
                      model=LADIStaff,
                      count=False,
@@ -187,7 +187,7 @@ def get_staffs(request: HttpRequest) -> JsonResponse:
 
 
 def get_staffs_count(request: HttpRequest) -> JsonResponse:
-    """ Get LADIStaff rows count """
+    """Get LADIStaff rows count."""
     query = WebQuery(request=request,
                      model=LADIStaff,
                      count=True,
@@ -204,7 +204,7 @@ def staffs_retrieve_results(query: WebQuery) -> QuerySet:
 # LADIForms
 
 def get_forms(request: HttpRequest) -> JsonResponse:
-    """ Get LADIForm """
+    """Get LADIForm """
     query = WebQuery(request=request,
                      model=LADIForm,
                      count=False,
@@ -214,7 +214,7 @@ def get_forms(request: HttpRequest) -> JsonResponse:
 
 
 def get_forms_count(request: HttpRequest) -> JsonResponse:
-    """ Get LADIForm rows count """
+    """Get LADIForm rows count."""
     query = WebQuery(request=request,
                      model=LADIForm,
                      count=True,
