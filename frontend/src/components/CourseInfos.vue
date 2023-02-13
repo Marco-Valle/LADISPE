@@ -17,14 +17,9 @@
                         <h1 align="center">
                             {{ course.title }}
                         </h1>
-                    </v-col>
-                    <v-col>
-                        <h2 :align="this.isLargeScreen ? 'left' : 'center'" 
-                            :style="{   'margin-bottom': `${this.isLargeScreen ? '0px' : '10px'}`, 
-                                        'margin-top': `${this.isLargeScreen ? '4px' : '0px'}`,
-                                    }" >
-                            ({{ course.course_code }})
-                        </h2>
+                        <h3 align="center">
+                            {{ course.course_code }}
+                        </h3>
                     </v-col>
                 </v-row>
 
