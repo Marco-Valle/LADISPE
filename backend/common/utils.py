@@ -21,7 +21,7 @@ def safe_path(trusted_part: Tuple[str], untrusted_part: Tuple[str]) -> str:
         return path if safe else sanitize_path_recursive(path=path, unsafe_symbols=unsafe_symbols)
     
     def sanitize_path(path: str) -> str:
-        unsafe_symbols = {'/', '..', '\\'}
+        unsafe_symbols = {'/', '..', '\\', sep}
         try:
             return sanitize_path_recursive(path=path, unsafe_symbols=unsafe_symbols)
         except RecursionError:
