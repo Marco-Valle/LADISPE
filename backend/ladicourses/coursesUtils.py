@@ -89,20 +89,20 @@ class materialDirectory:
 class courseDirectory(materialDirectory):
     """Root folder for a a LADICourse."""
     
-    professor_id    :   int
-    course_title    :   str
-    iter_queue      :   List[materialDirectory]
+    professor_id        :   int
+    course_title        :   str
+    _iter_queue         :   List[materialDirectory]
     
     
     def __init__(self, course_title, professor_id) -> None:
         """Initializer of the courseDirectory class."""
         self.professor_id = professor_id
         self.course_title = course_title
-        self.iter_queue = []
+        self._iter_queue = []
         path = safe_path(trusted_part=(MEDIA_ROOT, FILEBROWSER_DIRECTORY, 'Users'),
                          untrusted_part=(str(professor_id), course_title))
         materialDirectory.__init__(self, path=path)
-        self.iter_queue.append(self)
+        self._iter_queue.append(self)
     
     
     def __iter__(self) -> courseDirectory:
@@ -114,11 +114,11 @@ class courseDirectory(materialDirectory):
         
     def __next__(self) -> materialDirectory:
         """Get the next directory of the course."""
-        if not self.iter_queue:
+        if not self._iter_queue:
             raise StopIteration
-        next_dir = self.iter_queue.pop(0)
+        next_dir = self._iter_queue.pop(0)
         for dir in next_dir.dirs:
-            self.iter_queue.append(dir)
+            self._iter_queue.append(dir)
         return next_dir
         
     
