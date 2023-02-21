@@ -44,6 +44,7 @@ def get_courses_lectures(request: HttpRequest) -> JsonResponse:
     if not course:
         return JsonResponse([], safe=False)
     if not course.public and not request.user.is_superuser:
+        # If a course is not marked as public, just the professor and his assistants can request it.
         allowed_users = {course.professor, course.first_assistant, course.second_assistant}
         if request.user not in allowed_users:
             return JsonResponse([], safe=False)
