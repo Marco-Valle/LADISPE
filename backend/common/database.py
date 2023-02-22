@@ -172,7 +172,7 @@ class WebQuery:
         
         query_set = self._get_queryset()
         if self.type in {QueryType.COUNT_ALL, QueryType.COUNT_BY_KEYWORD}:
-            return JsonResponse(data=query_set.count, safe=False)
+            return JsonResponse(data=query_set.count(), safe=False)
         
         return self._json_from_queryset(query_set=query_set)
     
@@ -203,10 +203,11 @@ class WebQuery:
     def _get_queryset(self) -> QuerySet[Any]:
         """Get a QuerySet."""
         
-        if self.type not in {QueryType.ALL, QueryType.BY_KEYWORD}:
+        if self.type not in { QueryType.ALL, QueryType.BY_KEYWORD,
+                              QueryType.COUNT_ALL, QueryType.COUNT_BY_KEYWORD }:
             return self.model.objects.none()
         
-        if self.type == QueryType.ALL and not self.public:
+        if self.type in {QueryType.ALL, QueryType.COUNT_ALL} and not self.public:
             query_set = self.model.objects.all()
         elif self.model_search_func:
             query_set = self.model_search_func(self)
@@ -246,7 +247,7 @@ class WebQuery:
         """Set the query options from the request parameters."""
         
         id_func: Callable[[str], Any] = lambda value: int(value) if self.type == QueryType.BY_ID else -1
-        keyword_func: Callable[[str], Any] = lambda value: value if self.type in {QueryType.ALL, QueryType.BY_KEYWORD} else ''
+        keyword_func: Callable[[str], Any] = lambda value: value if self.type in {QueryType.COUNT_BY_KEYWORD, QueryType.BY_KEYWORD} else ''
         sort_func: Callable[[str], Any] = lambda value: SortType.DESCENDING if value  == 'desc'  else SortType.ASCENDING
         custom_options = {'obj_id': id_func, 'keyword': keyword_func, 'sort': sort_func}
         trusted_types = {'int', 'str'}

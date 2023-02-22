@@ -192,6 +192,27 @@
             defaultTableUpdate() {
                 this.updateTable(0, 10, this.table.sortable.order, this.table.sortable.sort);
             },
+            async updateTotalRecordCount(keyword) {
+                const tableWasLoading = this.table.isLoading;
+                const tmpUrl = `count/?keyword=${ keyword }`;
+                console.log(keyword);
+                if (!tableWasLoading) { this.table.isLoading = true; }
+                $.ajax({
+                    url: this.newsUrl + tmpUrl,
+                    type: "get",
+                    dataType: "json",
+                    success: (response) => {
+                        this.table.totalRecordCount = response;
+                    },
+                    error: (jqXHR, textStatus, errorThrown) => {
+                        this.table.totalRecordCount = 0;
+                        console.error(textStatus, errorThrown);
+                    },
+                    complete: () => {
+                        if (!tableWasLoading) { this.table.isLoading = false; }
+                    },
+                });
+            },
             async updateTable(offset, limit, order, sort) {
                 this.table.isLoading = true;
                 this.table.sortable.order = order;
@@ -204,7 +225,7 @@
                     type: "get",
                     dataType: "json",
                     success: (response) => {
-                        this.table.totalRecordCount = response.length;
+                        this.updateTotalRecordCount(keyword);
                         this.table.rows = [];
                         this.longestNewsChars = 0;
                         response.forEach(row => {
