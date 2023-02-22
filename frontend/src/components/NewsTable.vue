@@ -195,7 +195,6 @@
             async updateTotalRecordCount(keyword) {
                 const tableWasLoading = this.table.isLoading;
                 const tmpUrl = `count/?keyword=${ keyword }`;
-                console.log(keyword);
                 if (!tableWasLoading) { this.table.isLoading = true; }
                 $.ajax({
                     url: this.newsUrl + tmpUrl,
