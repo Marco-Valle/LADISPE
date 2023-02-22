@@ -236,7 +236,6 @@
                         });
                     },
                     error: (jqXHR, textStatus, errorThrown) => {
-                        this.table.totalRecordCount = 0;
                         console.error(textStatus, errorThrown);
                     },
                     complete: () => {
