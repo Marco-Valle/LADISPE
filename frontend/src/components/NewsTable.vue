@@ -21,8 +21,8 @@
                                 </v-col>
                                 <v-col cols="9" sm="9" md="7" lg="5" xl="5" xxl="5">
                                     <v-text-field v-model="tableHeader.searchedText"
-                                                  @change="defaultTableUpdate"
-                                                  @click:clear="defaultTableUpdate"
+                                                  @change="searchBarUpdate"
+                                                  @click:clear="searchBarUpdate"
                                                   append-icon="mdi-magnify"
                                                   label="Search"
                                                   single-line
@@ -133,6 +133,8 @@
                 ],
                 rows: [],
                 totalRecordCount: 1,
+                offset: 0,
+                limit: 10,
                 sortable: {
                     order: "timestamp",
                     sort: "desc",
@@ -189,8 +191,13 @@
             }
         },
         methods: {
+            searchBarUpdate() {
+                this.table.offset = 0;
+                this.table.limit = 10;
+                this.defaultTableUpdate();
+            },
             defaultTableUpdate() {
-                this.updateTable(0, 10, this.table.sortable.order, this.table.sortable.sort);
+                this.updateTable(this.table.offset, this.table.limit, this.table.sortable.order, this.table.sortable.sort);
             },
             async updateTotalRecordCount(keyword) {
                 const tableWasLoading = this.table.isLoading;
@@ -216,6 +223,8 @@
                 this.table.isLoading = true;
                 this.table.sortable.order = order;
                 this.table.sortable.sort = sort;
+                this.table.offset = offset;
+                this.table.limit = limit;
                 // If the search field is empty search all
                 const keyword = this.tableHeader.searchedText !== '' && this.tableHeader.searchedText != null ? this.tableHeader.searchedText : '*';
                 const tmpUrl = `?keyword=${ keyword }&offset=${ offset }&limit=${ limit }&order=${ order }&sort=${ sort }`;
