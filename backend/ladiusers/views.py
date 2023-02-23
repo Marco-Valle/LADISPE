@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse, HttpRequest
+from django.db.models import Q
 
 from common.database import *
 from ladiusers.models import LADIUser
@@ -19,6 +20,7 @@ def get_user(request: HttpRequest) -> JsonResponse:
     if not user:
         return JsonResponse([], safe=False)
     
+    restricted_email = False
     if not(request.user.is_superuser or request.user == user or 'ladiusers.view_LADIUser' in request.user.get_group_permissions()):
         try:
             # Is the requested user a staff member?
@@ -26,9 +28,10 @@ def get_user(request: HttpRequest) -> JsonResponse:
             restricted_user = False
         except ObjectDoesNotExist:
             # Is the requested user a staff member of some courses?
-            query_set = LADICourse.objects.filter(professor_id=query.obj_id, private_email=False)
-            query_set = LADICourse.objects.filter(first_assistant_id=query.obj_id, private_email=False).union(query_set)
-            query_set = LADICourse.objects.filter(second_assistant_id=query.obj_id, private_email=False).union(query_set)
+            query_set = LADICourse.objects.filter(Q(professor_id=query.obj_id) | \
+                Q(first_assistant_id=query.obj_id) | Q(second_assistant_id=query.obj_id))
+            private_email_courses = LADICourse.objects.filter(private_email=True)
+            restricted_email = query_set.difference(private_email_courses).count() == 0
             restricted_user = False if query_set and query_set.count() else True
 
     if restricted_user:
@@ -39,6 +42,6 @@ def get_user(request: HttpRequest) -> JsonResponse:
         'id': query.obj_id,
         'name': user.name,
         'surname': user.surname,
-        'email': user.email,
+        'email': user.email if not restricted_email else '',
     }
     return JsonResponse(result, safe=True)
