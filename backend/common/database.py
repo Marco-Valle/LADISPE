@@ -210,7 +210,8 @@ class WebQuery:
         if self.type not in ASK_FOR_ALL.union(ASK_BY_KEYWORD):
             return self.model.objects.none()
         
-        if self.type in ASK_FOR_ALL and not self.public:
+        if self.type in ASK_FOR_ALL and not self.public and \
+            not self.options.attributes.difference({attribute for attribute in QueryAttribute}):
             query_set = self.model.objects.all()
         elif self.model_search_func:
             query_set = self.model_search_func(self)
