@@ -29,9 +29,16 @@
                         <h4>Email</h4>
                     </v-btn>
                 </v-col>
-                <v-col>
+                <v-col v-if="course.mandatory_redirection !== 'True'">
                     <v-btn elevation="5" outlined class="my-button"
                            :to="`${courseUrl}${course.id}`" >
+                        <h4 v-if="userLang === 'it'">Apri</h4>
+                        <h4 v-else>Open</h4>
+                    </v-btn>
+                </v-col>
+                <v-col v-else-if="course.course_site !== ''">
+                    <v-btn elevation="5" outlined class="my-button"
+                           :href="course.course_site" >
                         <h4 v-if="userLang === 'it'">Apri</h4>
                         <h4 v-else>Open</h4>
                     </v-btn>
