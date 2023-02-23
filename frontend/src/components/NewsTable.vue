@@ -256,7 +256,7 @@
 
                 if (id <= 0) {
                     this.tableHeader.searchedText = '';
-                    this.defaultTableUpdate();
+                    this.searchBarUpdate();
                     return;
                 }
                 $.ajax({
@@ -265,7 +265,7 @@
                     dataType: "json",
                     success: (response) => {
                         this.tableHeader.searchedText = response.title
-                        this.defaultTableUpdate();
+                        this.searchBarUpdate();
                     },
                     error: (jqXHR, textStatus, errorThrown) => {
                         console.error(textStatus, errorThrown);
