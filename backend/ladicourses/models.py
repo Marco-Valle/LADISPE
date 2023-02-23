@@ -13,6 +13,7 @@ class LADICourse(models.Model):
 
     timestamp = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=True)
+    private_email = models.BooleanField(default=False)
     course_code = models.CharField(max_length=7, unique=True,
                                    validators=[RegexValidator('^[0-9]{2}[A-Z]{5}$', 'Course code in the format ##XXXXX')])
     cover = FileBrowseField("Image", max_length=200, directory='Covers/', default='default.png')
