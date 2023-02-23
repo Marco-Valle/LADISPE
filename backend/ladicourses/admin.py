@@ -103,7 +103,7 @@ class LectureAuthorAdmin(admin.ModelAdmin):
     def save_form(self, request: HttpRequest, form: Any, change: bool) -> LADILecture:
         """This function is called when a user tries to save an object in the admin portal."""
         
-        if not request.get("user"):
+        if not request.user:
             raise PermissionDenied()
         if not request.user.is_superuser:
             course_id = request.POST.get('course')
@@ -136,7 +136,7 @@ class LectureAuthorAdmin(admin.ModelAdmin):
         """Check if the user has the ownership in a specific object."""
         if not obj or request.user.is_superuser:
             return True
-        if not request.get("user"):
+        if not request.user:
             return False
         return request.user in { obj.course.professor, obj.course.first_assistant, obj.course.second_assistant }
 
