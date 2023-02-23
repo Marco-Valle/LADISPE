@@ -42,7 +42,7 @@
                                             <v-btn elevation="5" outlined
                                                    class="my-button"
                                                    :href="item.lecture_url" >
-                                                <h4 v-if="userLang === 'it'">Apri R</h4>
+                                                <h4 v-if="userLang === 'it'">Apri</h4>
                                                 <h4 v-else>Open</h4>
                                             </v-btn>
                                         </v-col>
