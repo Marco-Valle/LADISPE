@@ -134,9 +134,7 @@ class LectureAuthorAdmin(admin.ModelAdmin):
         """Check if the user has the ownership in a specific object."""
         if not obj or request.user.is_superuser:
             return True
-        if obj.course.first_assistant == request.user or obj.course.second_assistant == request.user:
-            return True
-        return obj.course.professor == request.user
+        return request.user in { obj.course.professor, obj.course.first_assistant, obj.course.second_assistant }
 
 
 
