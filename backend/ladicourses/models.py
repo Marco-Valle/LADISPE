@@ -38,6 +38,7 @@ class LADILecture(models.Model):
     course = models.ForeignKey(LADICourse, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     cover = FileBrowseField("Image", max_length=200, directory='Covers/', default='default.png')
+    lecture_url = models.URLField(blank=True, help_text="URL to be opened insted of the standard LADISPE site page.")
     html = HTMLField(blank=True)
     author = models.CharField(max_length=30, blank=True)
 
