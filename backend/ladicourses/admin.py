@@ -30,6 +30,9 @@ class CourseAuthorAdmin(admin.ModelAdmin):
                 CourseAuthorAdmin.update_course_directory(obj, old_title=old_title)
                 return obj
             
+        if not obj.course_site:
+            obj.mandatory_redirection = False
+            
         # Select automatically the owner
         try:
             obj.owner = request.user
