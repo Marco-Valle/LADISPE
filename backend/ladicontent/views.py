@@ -42,7 +42,7 @@ def get_news_count(request: HttpRequest) -> JsonResponse:
 
 
 def news_retrieve_results(query: WebQuery) -> QuerySet:
-    if query.type == QueryType.ALL:
+    if query.type in ASK_FOR_ALL:
         query_set = LADINews.objects.all()
     else:
         query_set = LADINews.objects.filter(title__contains=query.keyword)
@@ -114,7 +114,7 @@ def get_stories_count(request: HttpRequest) -> JsonResponse:
 
 
 def stories_retrieve_results(query: WebQuery) -> QuerySet:
-    if query.type == QueryType.ALL:
+    if query.type in ASK_FOR_ALL:
         query_set = LADIStory.objects.all()
     else:
         query_set = LADIStory.objects.filter(title__startswith=query.keyword)
@@ -224,7 +224,7 @@ def get_forms_count(request: HttpRequest) -> JsonResponse:
 
 
 def forms_retrieve_results(query: WebQuery) -> QuerySet:
-    if query.type == QueryType.ALL:
+    if query.type in ASK_FOR_ALL:
         query_set = LADIForm.objects.all()
     else:
         query_set = LADIForm.objects.filter(title__contains=query.keyword)

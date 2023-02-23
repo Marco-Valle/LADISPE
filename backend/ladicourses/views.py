@@ -63,7 +63,7 @@ def get_courses_materials(request: HttpRequest) -> JsonResponse:
 
 
 def courses_retrieve_results(query: WebQuery) -> QuerySet:
-    if query.type == QueryType.ALL:
+    if query.type in ASK_FOR_ALL:
         query_set = LADICourse.objects.all()
     else:
         query_set = LADICourse.objects.filter(course_code__exact=query.keyword)
@@ -98,7 +98,7 @@ def get_lectures_count(request: HttpRequest) -> JsonResponse:
 
 
 def lectures_retrieve_results(query: WebQuery) -> QuerySet:
-    if query.type == QueryType.ALL:
+    if query.type in ASK_FOR_ALL:
         query_set = LADILecture.objects.all()
     else:
         query_set = LADILecture.objects.filter(title__contains=query.keyword)

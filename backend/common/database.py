@@ -31,6 +31,11 @@ class SortType(Enum):
     DESCENDING = auto()
     
 
+ASK_FOR_ALL = { QueryType.ALL, QueryType.COUNT_ALL }
+ASK_FOR_COUNT = { QueryType.COUNT_ALL, QueryType.COUNT_BY_KEYWORD }
+ASK_BY_KEYWORD = { QueryType.BY_KEYWORD, QueryType.COUNT_BY_KEYWORD }
+
+
 class WebQueryTypeError(TypeError):
     """WebQuery type error
 
@@ -134,8 +139,7 @@ class WebQuery:
     
     @property
     def keyword(self) -> str:
-        query_by_keyword_types = {QueryType.COUNT_BY_KEYWORD, QueryType.BY_KEYWORD}
-        if self.type not in query_by_keyword_types:
+        if self.type not in ASK_BY_KEYWORD:
             raise WebQueryTypeError(wrong_type=self.type, missing_property='keyword')
         return self.options.keyword
   
@@ -171,7 +175,7 @@ class WebQuery:
             return self._json_from_object(obj=obj)
         
         query_set = self._get_queryset()
-        if self.type in {QueryType.COUNT_ALL, QueryType.COUNT_BY_KEYWORD}:
+        if self.type in ASK_FOR_COUNT:
             return JsonResponse(data=query_set.count(), safe=False)
         
         return self._json_from_queryset(query_set=query_set)
@@ -203,18 +207,17 @@ class WebQuery:
     def _get_queryset(self) -> QuerySet[Any]:
         """Get a QuerySet."""
         
-        if self.type not in { QueryType.ALL, QueryType.BY_KEYWORD,
-                              QueryType.COUNT_ALL, QueryType.COUNT_BY_KEYWORD }:
+        if self.type not in ASK_FOR_ALL.union(ASK_BY_KEYWORD):
             return self.model.objects.none()
         
-        if self.type in {QueryType.ALL, QueryType.COUNT_ALL} and not self.public:
+        if self.type in ASK_FOR_ALL and not self.public:
             query_set = self.model.objects.all()
         elif self.model_search_func:
             query_set = self.model_search_func(self)
         else:
             return self.model.objects.none()
             
-        if not query_set.count:
+        if not query_set.count():
             return self.model.objects.none()
         
         # ORDERED BY
@@ -247,7 +250,7 @@ class WebQuery:
         """Set the query options from the request parameters."""
         
         id_func: Callable[[str], Any] = lambda value: int(value) if self.type == QueryType.BY_ID else -1
-        keyword_func: Callable[[str], Any] = lambda value: value if self.type in {QueryType.COUNT_BY_KEYWORD, QueryType.BY_KEYWORD} else ''
+        keyword_func: Callable[[str], Any] = lambda value: value if self.type in ASK_BY_KEYWORD else ''
         sort_func: Callable[[str], Any] = lambda value: SortType.DESCENDING if value  == 'desc'  else SortType.ASCENDING
         custom_options = {'obj_id': id_func, 'keyword': keyword_func, 'sort': sort_func}
         trusted_types = {'int', 'str'}
