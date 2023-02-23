@@ -1,5 +1,5 @@
 <template>
-    <v-card elevation="2" class="border border-dark default-card" >
+    <v-card elevation="2" class="border border-dark default-card" max-width="30%">
 
         <v-img max-height="250"
                alt="staff.fullname"
