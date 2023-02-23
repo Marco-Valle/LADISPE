@@ -34,8 +34,8 @@ def get_user(request: HttpRequest) -> JsonResponse:
             restricted_email = query_set.difference(private_email_courses).count() == 0
             restricted_user = False if query_set and query_set.count() else True
 
-    if restricted_user:
-        return JsonResponse([], safe=False)
+        if restricted_user:
+            return JsonResponse([], safe=False)
 
     # Don't send the entire user, sensitive infos may be leaked (password hash, privileges...)
     result = {
