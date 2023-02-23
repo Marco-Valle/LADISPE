@@ -29,7 +29,7 @@
                             <a v-if="userLang === 'it'" :href="course.course_site" class="site-anchor">
                                 Pagina officiale del corso
                             </a>
-                            <a v-else :href="course.course_site" class="lecture-anchor">
+                            <a v-else :href="course.course_site" class="site-anchor">
                                 Official page of the course
                             </a><br>
                         </p>
