@@ -91,8 +91,8 @@ class LADIStaff(models.Model):
     """LADIStaff db model."""
 
     cover = models.ImageField(upload_to='staff/%Y/%m/%d/', default='default.png')
-    user = models.ForeignKey(User, on_delete=models.CASCADE,
-                             help_text="If you create a LADIStaff with a particular user, his name, surname and email will be public")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True,
+                                help_text="If you create a LADIStaff with a particular user, his name, surname and email will be public")
     position = models.CharField(max_length=30)
     phone = PhoneNumberField(null=True, blank=True)
     fax = PhoneNumberField(null=True, blank=True)
