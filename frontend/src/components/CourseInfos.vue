@@ -23,9 +23,17 @@
                     </v-col>
                 </v-row>
 
-                <v-row v-if="course.degree_course !== ''" class="course-degree-row" >
+                <v-row v-if="course.degree_course !== '' || course.course_site !== ''" class="course-second-row" >
                     <v-col md-offset="1" lg-offset="1" xl-offset="1" xxl-offset="1">
-                        <p class="course-degree-paragraph">
+                        <p v-if="course.course_site !== ''" class="lecture-paragraph">
+                            <a v-if="userLang === 'it'" :href="course.course_site" class="site-anchor">
+                                Pagina officiale del corso
+                            </a>
+                            <a v-else :href="course.course_site" class="lecture-anchor">
+                                Official page of the course
+                            </a><br>
+                        </p>
+                        <p v-if="course.degree_course !== ''" class="course-degree-paragraph">
                             <span v-if="isLargeScreen && userLang === 'it'">
                                 Corso di laurea:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                             </span>
@@ -140,7 +148,7 @@
         text-align: center
     }
 
-    .course-degree-row {
+    .course-second-row {
         padding-left: 20px;
         margin-bottom: 15px;
     }
@@ -154,7 +162,13 @@
     }
 
     .course-title-row {
-        margin-bottom: 20px;
+        margin-bottom: 5px;
+    }
+
+    .lecture-paragraph {   
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 15px;
     }
 
     table {
