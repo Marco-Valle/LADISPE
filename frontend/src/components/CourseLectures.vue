@@ -30,11 +30,19 @@
                                 </v-card-subtitle>
                                 <v-card-actions>
                                     <v-row justify="center" allign="center">
-                                        <v-col>
+                                        <v-col v-if="item.lecture_url === ''">
                                             <v-btn elevation="5" outlined
                                                    class="my-button"
                                                    :to="`${lectureUrl}${item.id}`" >
                                                 <h4 v-if="userLang === 'it'">Apri</h4>
+                                                <h4 v-else>Open</h4>
+                                            </v-btn>
+                                        </v-col>
+                                        <v-col v-else>
+                                            <v-btn elevation="5" outlined
+                                                   class="my-button"
+                                                   :href="item.lecture_url" >
+                                                <h4 v-if="userLang === 'it'">Apri R</h4>
                                                 <h4 v-else>Open</h4>
                                             </v-btn>
                                         </v-col>
@@ -207,6 +215,7 @@
                         response.forEach(lecture => {
                             lecture.visibleTitle = this.truncateTitle(lecture.title);
                             this.lectures.push(lecture);
+                            console.log(JSON.stringify(lecture));
                         });
                         this.adjustLecturesBatches();
                     },
