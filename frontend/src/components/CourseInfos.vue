@@ -49,7 +49,7 @@
                                     <p v-else>Secondo Assistente</p>
                                 </td>
                                 <td v-if="staff != undefined">{{ staff.fullname }}</td>
-                                <td v-if="staff != undefined">
+                                <td v-if="staff != undefined && !course.private_email">
                                     <a class="site-anchor" :href="`mailto:${ staff.email }`">{{ staff.email }}</a>
                                 </td>
                             </tr>
@@ -62,7 +62,7 @@
                                     <p v-else>Second Assistant</p>
                                 </td>
                                 <td v-if="staff != undefined">{{ staff.fullname }}</td>
-                                <td v-if="staff != undefined">
+                                <td v-if="staff != undefined && !course.private_email">
                                     <a class="site-anchor" :href="`mailto:${ staff.email }`">{{ staff.email }}</a>
                                 </td>
                             </tr>
@@ -126,6 +126,7 @@
         mounted(){
             this.api_base_url = this.$api_base_url;
             this.mediaUrl = `${this.$base_url}${process.env.VUE_APP_MEDIA_URL_PREFIX}`
+            console.log("Course:", JSON.stringify(this.course))
         },
         methods: {}
     }

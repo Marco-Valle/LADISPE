@@ -23,7 +23,7 @@
 
         <v-card-actions>
             <v-row justify="center" align="center">
-                <v-col>
+                <v-col v-if="!course.private_email">
                     <v-btn elevation="5" outlined class="my-button"
                            @click="email(staffs.professor.email)" >
                         <h4>Email</h4>
