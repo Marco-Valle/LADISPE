@@ -1,4 +1,4 @@
-from django.core.exceptions import SuspiciousOperation, ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse, HttpRequest
 
 from common.database import *
