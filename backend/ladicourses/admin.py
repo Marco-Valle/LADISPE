@@ -108,7 +108,7 @@ class LectureAuthorAdmin(admin.ModelAdmin):
             if not course_id:
                 raise SuspiciousOperation("Missing course ID")
             course = LADICourse.objects.get(id=course_id)
-            if course.professor != request.user and course.first_assistant != request.user and course.second_assistant != request.user:
+            if request.user not in { course.professor, course.first_assistant, course.second_assistant }:
                 raise PermissionDenied()
         obj = super().save_form(request, form, change)
         return obj
