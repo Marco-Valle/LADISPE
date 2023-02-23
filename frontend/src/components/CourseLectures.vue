@@ -215,7 +215,6 @@
                         response.forEach(lecture => {
                             lecture.visibleTitle = this.truncateTitle(lecture.title);
                             this.lectures.push(lecture);
-                            console.log(JSON.stringify(lecture));
                         });
                         this.adjustLecturesBatches();
                     },
