@@ -44,6 +44,11 @@ const routes = [
         component: () => import('@/views/FormsView.vue')
     },
     {
+        path: '/pdf/:pdfName',
+        name: 'pdf_viewer',
+        component: () => import('@/views/PdfView.vue')
+    },
+    {
         path: "/:catchAll(.*)",
         component: PageNotFound
     },

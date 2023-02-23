@@ -120,9 +120,9 @@
                 {
                     text: 'Timetable',
                     textIT: 'Tabella orari',
-                    to: '',
-                    staticUrl: 'uploads/timetable.pdf',
-                    isMediaUrl: true,
+                    to: '/pdf/timetable',
+                    staticUrl: '',
+                    isMediaUrl: false,
                     icon: 'mdi-timetable',
                 },
                 {
@@ -136,9 +136,9 @@
                 {
                     text: 'Rules',
                     textIT: 'Regolamento',
-                    to: '',
-                    staticUrl: 'uploads/rules.pdf',
-                    isMediaUrl: true,
+                    to: '/pdf/rules',
+                    staticUrl: '',
+                    isMediaUrl: false,
                     icon: 'mdi-clipboard-list',
                 },
             ],
