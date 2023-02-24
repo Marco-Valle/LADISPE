@@ -87,7 +87,9 @@ class materialDirectory:
 
 
 class courseDirectory(materialDirectory):
-    """Root folder for a a LADICourse."""
+    """Iterator for the root folder for a a LADICourse.
+    It makes possible to iterate between all the subdirectories
+    within the MAX_DEPTH_IN_MATERIAL_SEARCH limit."""
     
     professor_id        :   int
     course_title        :   str
@@ -95,7 +97,7 @@ class courseDirectory(materialDirectory):
     
     
     def __init__(self, course_title, professor_id) -> None:
-        """Initializer of the courseDirectory class."""
+        """Initializer of the courseDirectory interator."""
         self.professor_id = professor_id
         self.course_title = course_title
         self._iter_queue = []
