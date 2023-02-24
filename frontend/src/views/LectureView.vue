@@ -5,7 +5,7 @@
         <v-row align="center" justify="center">
             <v-col>
                 <h1 align="center" class="story-title">{{ lecture.title }}</h1>
-                <h3 align="center" v-if="lecture.course !== 0">{{ course.title }} {{ course.course_code }}</h3>
+                <h3 align="center" v-if="lecture.course !== 0">{{ course.title }}</h3>
             </v-col>
 
         </v-row>
