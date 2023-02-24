@@ -9,7 +9,7 @@
                 <RefreshIcon icon="mdi-bookshelf" clickEvent="updateMaterials" :userLang="userLang" />
                 <v-spacer />
 
-                <v-carousel hide-delimiters :progress="progressBarColor" :show-arrows="arrowsEnabled">
+                <v-carousel hide-delimiters :progress="progressBarColor" :show-arrows="!touchDevice">
 
                     <template v-slot:prev="{ props }">
                         <v-btn variant="elevated"
@@ -56,22 +56,28 @@
                                                 <th class="text-left">
                                                     Nome file
                                                 </th>
-                                                <th class="text-left">
+                                                <th v-if="!touchDevice" class="text-left">
                                                     Data di modifica
                                                 </th>
-                                                <th class="text-left">
+                                                <th v-if="!touchDevice" class="text-left">
                                                     Dimensione (MB)
+                                                </th>
+                                                <th v-else>
+                                                    MB
                                                 </th>
                                             </tr>
                                             <tr v-else>
                                                 <th class="text-left">
                                                     Filename
                                                 </th>
-                                                <th class="text-left">
+                                                <th v-if="!touchDevice" class="text-left">
                                                     Modifications Date
                                                 </th>
-                                                <th class="text-left">
+                                                <th v-if="!touchDevice" class="text-left">
                                                     Size (MB)
+                                                </th>
+                                                <th v-else>
+                                                    MB
                                                 </th>
                                             </tr>
                                         </thead>
@@ -83,7 +89,7 @@
                                                         {{ file.name }}
                                                     </a>
                                                 </td>
-                                                <td>
+                                                <td v-if="!touchDevice">
                                                     <p>
                                                         {{ file.date }}
                                                     </p>
@@ -153,7 +159,7 @@
             },
         },
         data: () => ({
-            arrowsEnabled: true,
+            touchDevice: false,
         }),
         created(){
             this.emitter.on('updateMaterials', () => {
@@ -161,7 +167,7 @@
             });
         },
         mounted() {
-            this.arrowsEnabled = !this.isTouchDevice();
+            this.touchDevice = this.isTouchDevice();
         },
         methods: {
             getFullFileUrl(file_url) {
