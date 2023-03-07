@@ -28,7 +28,7 @@ services:
   nginx:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     volumes:
       - static_volume:/home/app/staticfiles
       - media_volume:/home/app/mediafiles
